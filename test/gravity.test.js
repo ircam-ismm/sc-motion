@@ -255,12 +255,12 @@ suite('gravity', () => {
           gyroscope,
         });
         assert(almostEqualArray(gravity, gravityExpected, tolerance),
-      `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
+          `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
         run++;
-  }), {
-    numRuns: data.input.length,
-    ...debugOptions,
-  });
+      }), {
+      numRuns: data.input.length,
+      ...debugOptions,
+    });
 
 
 
