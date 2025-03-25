@@ -49,10 +49,9 @@ export function arrayToAlphaBetaGamma([alpha, beta, gamma]) {
 }
 
 export const inputApiValid = [
-  // @TODO
-  // 'v3',
+  'v3',
   'riot-v2-array', // validate with pipo
-  'riot-v1-array', // internal for gravity. @TODO: drop
+  'riot-v1-array', // internal for gravity.
 ];
 
 export function inputApiValidate(api) {
@@ -60,11 +59,9 @@ export function inputApiValidate(api) {
 }
 
 export const outputApiValid = [
-  // @TODO
-  // 'v3',
-  // 'v3-array',
+  'v3',
   'riot-v2-array', // validate with pipo
-  'riot-v1-array', // internal for gravity. @TODO: drop
+  'riot-v1-array', // internal for gravity.
 ];
 
 export function outputApiValidate(api) {
@@ -72,7 +69,6 @@ export function outputApiValidate(api) {
 }
 
 export function apiConvert({
-  // @TODO: 'v3'
   inputApi = 'riot-v2-array',
   outputApi = 'riot-v2-array',
   accelerometer: accelerometerInput,
@@ -94,36 +90,66 @@ export function apiConvert({
     return returnValue;
   } // inputApi === outputApi
 
-  if(inputApi === 'v3' && outputApi === 'v3-array') {
+  if(inputApi === 'v3' && outputApi === 'riot-v1-array') {
     const returnValue = {};
-    if(accelerometerInput) {
-      returnValue.accelerometer = xyzToArray(accelerometerInput);
-    }
-    if(gyroscopeInput) {
-      returnValue.gyroscope = xyzToArray(gyroscopeInput);
-    }
-    if(gravityInput) {
-      returnValue.gravity = xyzToArray(gravityInput);
-    }
-    return returnValue;
-  } // inputApi === 'v3' && outputApi === 'v3-array'
 
-  if(inputApi === 'v3-array' && outputApi === 'v3') {
-    const returnValue = {};
-    if(accelerometerInput) {
-      returnValue.accelerometer = arrayToXyz(accelerometerInput);
+    if (accelerometerInput) {
+      returnValue.accelerometer = [
+        -accelerometerInput.y * gInverse,
+        accelerometerInput.x * gInverse,
+        accelerometerInput.z * gInverse,
+      ];
     }
-    if(gyroscopeInput) {
-      returnValue.gyroscope = arrayToXyz(gyroscopeInput);
+    if (gyroscopeInput) {
+      returnValue.gyroscope = [
+        -gyroscopeInput.y,
+        -gyroscopeInput.z,
+        gyroscopeInput.x,
+      ];
     }
-    if(gravityInput) {
-      returnValue.gravity = arrayToXyz(gravityInput);
+
+    if (gravityInput) {
+      returnValue.gravity = [
+        -gravityInput.y * gInverse,
+        gravityInput.x * gInverse,
+        gravityInput.z * gInverse,
+
+      ];
     }
     return returnValue;
-  } // inputApi === 'v3-array' && outputApi === 'v3'
+
+  } // inputApi === 'v3' && outputApi === 'riot-v1-array'
+
+  if(inputApi === 'riot-v1-array' && outputApi === 'v3') {
+    const returnValue = {};
+
+    if(accelerometerInput) {
+      returnValue.accelerometer = {
+        x: accelerometerInput[1] * g,
+        y: -accelerometerInput[0] * g,
+        z: accelerometerInput[2] * g,
+      };
+    }
+    if(gyroscopeInput) {
+      returnValue.gyroscope = {
+        x: gyroscopeInput[2],
+        y: -gyroscopeInput[0],
+        z: -gyroscopeInput[1],
+      };
+    }
+    if(gravityInput) {
+      returnValue.gravity = {
+        x: gravityInput[1] * g,
+        y: -gravityInput[0] * g,
+        z: gravityInput[2] * g,
+      };
+    }
+    return returnValue;
+  } // inputApi === 'riot-v1-array' && outputApi === 'v3'
+
 
   if(inputApi === 'riot-v2-array' && outputApi === 'riot-v1-array') {
-    let returnValue = {};
+    const returnValue = {};
 
     if (accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
@@ -144,7 +170,8 @@ export function apiConvert({
   } // inputApi === 'riot-v2-array' && outputApi === 'riot-v1-array'
 
   if(inputApi === 'riot-v1-array' && outputApi === 'riot-v2-array') {
-    let returnValue = {};
+    const returnValue = {};
+
     if(accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
     }

@@ -232,7 +232,140 @@ suite('conversion', () => {
     }); // inputApi === outputApi
 
 
-    test('from v2-array to v1-array', () => {
+    function apiConvertValidate({
+      inputApi,
+      outputApi,
+      examples,
+      debugOptions,
+    }) {
+      let run = 0;
+      fc.assert(
+        fc.property(
+          // input
+          fc.record({
+            accelerometer: (inputApi === 'v3'
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
+            ),
+            gyroscope: (inputApi === 'v3'
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
+            ),
+            gravity: (inputApi === 'v3'
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
+            ),
+          }),
+          // output
+          fc.record({
+            accelerometer: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
+            gyroscope: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
+            gravity: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
+          }),
+
+          (input, outputExpected) => {
+
+            if (!debugOptions.seed
+              && run++ < examples.length) {
+
+              const output = apiConvert({
+                inputApi,
+                outputApi,
+                ...input
+              });
+              ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
+                assert(almostEqualArray(
+                  output[key], outputExpected[key]),
+                  `example: ${JSON.stringify({
+                    inputApi, outputApi,
+                    input, output, outputExpected,
+                  })}`);
+              });
+            } // examples
+
+            const output = apiConvert({
+              inputApi,
+              outputApi,
+              ...input
+            });
+            const inputReverted = apiConvert({
+              inputApi: outputApi,
+              outputApi: inputApi,
+              ...output,
+            });
+
+            ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
+              assert(
+                (inputApi === 'v3'
+                  ? almostEqualArray(xyzToArray(input[key]), xyzToArray(inputReverted[key]))
+                  : almostEqualArray(input[key], inputReverted[key])
+                ),
+                `reverted: ${JSON.stringify({
+                  inputApi, outputApi, input,
+                })}`);
+            });
+
+          }), {
+        examples,
+        ...debugOptions,
+      });
+    }
+
+    test('from v3 to v1-array and back', () => {
+
+      const inputApi = 'v3';
+      const outputApi = 'riot-v1-array';
+
+      const examples = [
+        [
+          {
+            // input
+            accelerometer: { x: 0, y: 0, z: 0 },
+            gyroscope: { x: 0, y: 0, z: 0 },
+            gravity: { x: 0, y: 0, z: 0 },
+          },
+          {
+            // output
+            accelerometer: [0, 0, 0],
+            gyroscope: [0, 0, 0],
+            gravity: [0, 0, 0],
+          },
+        ],
+        [
+          {
+            // input
+            accelerometer: { x: 1, y: 2, z: 3 },
+            gyroscope: { x: 4, y: 5, z: 6 },
+            gravity: { x: 7, y: 8, z: 9},
+          },
+          {
+            // output
+            accelerometer: [-2 / g, 1 / g, 3 / g],
+            gyroscope: [-5, -6, 4],
+            gravity: [-8 / g, 7 / g, 9 / g],
+          },
+        ],
+
+      ]
+
+      // replace with replay options, like
+      // { seed: 824551551, path: "0", endOnFailure: true }
+      const debugOptions = {};
+
+      apiConvertValidate({
+        inputApi,
+        outputApi,
+        examples,
+        debugOptions,
+      });
+
+    }); // from v2-array to v1-array
+
+
+    test('from v2-array to v1-array and back', () => {
+
+      const inputApi = 'riot-v2-array';
+      const outputApi = 'riot-v1-array';
 
       const examples = [
         [
@@ -270,68 +403,14 @@ suite('conversion', () => {
       // { seed: 824551551, path: "0", endOnFailure: true }
       const debugOptions = {};
 
-      let run = 0;
-      fc.assert(
-        fc.property(
-          // input
-          fc.record({
-            accelerometer: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-            gyroscope: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-            gravity: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-          }),
-          // output
-          fc.record({
-            accelerometer: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-            gyroscope: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-            gravity: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
-          }),
-          (input, outputExpected) => {
-            const inputApi = 'riot-v2-array';
-            const outputApi = 'riot-v1-array';
-
-            if (!debugOptions.seed
-              && run < examples.length) {
-
-              const output = apiConvert({
-                inputApi,
-                outputApi,
-                ...input
-              });
-              ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
-                assert(almostEqualArray(
-                  output[key], outputExpected[key]),
-                  `example: ${JSON.stringify({
-                    inputApi, outputApi, input, outputExpected, output
-                  })}`);
-              });
-            } // examples
-
-            const output = apiConvert({
-              inputApi,
-              outputApi,
-              ...input
-            });
-            const inputReverted = apiConvert({
-              inputApi: outputApi,
-              outputApi: inputApi,
-              ...output,
-            });
-
-            ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
-              assert(almostEqualArray(
-                input[key], inputReverted[key]),
-                `reverted: ${JSON.stringify({
-                  inputApi, outputApi, input,
-                })}`);
-            });
-
-            ++run;
-          }), {
+      apiConvertValidate({
+        inputApi,
+        outputApi,
         examples,
-        ...debugOptions,
+        debugOptions,
       });
 
-    }); // inputApi === outputApi
+    }); // from v2-array to v1-array
 
 
   }); // apiConvert

@@ -117,7 +117,7 @@ suite('data integrity', () => {
     });
 
     test('columns', () => {
-      assert.equal( tracks.accelerometer.mxCols, 3);
+      assert.strictEqual( tracks.accelerometer.mxCols, 3);
     });
   });
 
@@ -127,11 +127,11 @@ suite('data integrity', () => {
     });
 
     test('columns', () => {
-      assert.equal(tracks.gyroscope.mxCols, 3);
+      assert.strictEqual(tracks.gyroscope.mxCols, 3);
     });
 
     test('size', () => {
-      assert.equal(tracks.gyroscope.buffers[0].size,
+      assert.strictEqual(tracks.gyroscope.buffers[0].size,
         tracks.accelerometer.buffers[0].size);
     });
   });
@@ -142,11 +142,11 @@ suite('data integrity', () => {
     });
 
     test('columns', () => {
-      assert.equal(tracks.orientation.mxCols, 6);
+      assert.strictEqual(tracks.orientation.mxCols, 6);
     });
 
     test('size', () => {
-      assert.equal(tracks.orientation.buffers[0].size,
+      assert.strictEqual(tracks.orientation.buffers[0].size,
         tracks.accelerometer.buffers[0].size - 1);
     });
   });
