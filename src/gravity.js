@@ -13,6 +13,7 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *
  * @see https://w3c.github.io/accelerometer/#gravitysensor-interface
  *
+ *
  * @example
  *
  * import { Gravity } from '@ircam/sc-motion/gravity.js';
@@ -53,6 +54,9 @@ export class Gravity {
    * @param {number} [options.sampleRate=undefined] - The sample rate for processing. Used
    * if sampleTime is not provided when processing.
    *
+   * @throws {Error} Throws an error if `sampleRate` is not a positive number.
+   * @throws {Error} Throws an error if `api` is invalid.
+   * @throws {Error} Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
    */
   constructor({
     api,
@@ -81,12 +85,13 @@ export class Gravity {
   }
 
 
+
   /**
-   * Sets the attributes of the Gravity object.
+   * Sets the attributes for the Gravity instance.
    *
-   * @param {Object} attributes - The attributes to be set. Same as constructor
-   * options.
+   * @param {Object} attributes - The attributes to set. Same as constructor.
    *
+  * @throws {Error} Same as constructor.
    */
   set(attributes) {
     const { sampleRate } = attributes;
@@ -119,10 +124,14 @@ export class Gravity {
    * @param {number[]} params.accelerometer - The accelerometer data, conforming to the API version.
    * @param {number[]} params.gyroscope - The gyroscope data, conforming to the API version.
    * @param {number} [params.sampleTime] - The timestamp of the current sample in seconds.
-   * @returns {Object} An object containing the estimated gravity vector.
+   *
+   * @returns {Object} An object containing the estimated gravity vector. The gravity vector
+   * is normalised and conforms to the API version specified in the constructor.
+   *
    * @throws {Error} Throws an error if accelerometer data is missing.
    * @throws {Error} Throws an error if gyroscope data is missing.
-   * @throws {Error} Throws an error if both sample interval and sample rate are missing.
+   * @throws {Error} Throws an error if both sample interval and sample rate are missing (sample rate
+   * comes from the constructor or the set method).
    */
   process({
     accelerometer,

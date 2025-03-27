@@ -253,12 +253,15 @@ accelerometer and gyroscope estimates to null.
 
 ### set
 
-Sets the attributes of the Gravity object.
+Sets the attributes for the Gravity instance.
 
 #### Parameters
 
-*   `attributes` **[Object][22]** The attributes to be set. Same as constructor
-    options.
+*   `attributes` **[Object][22]** The attributes to set. Same as constructor.
+
+<!---->
+
+*   Throws **[Error][24]** Same as constructor.
 
 ### process
 
@@ -278,9 +281,11 @@ accelerometer, gyroscope and gravity conform to the `api` version specified in t
 
 *   Throws **[Error][24]** Throws an error if accelerometer data is missing.
 *   Throws **[Error][24]** Throws an error if gyroscope data is missing.
-*   Throws **[Error][24]** Throws an error if both sample interval and sample rate are missing.
+*   Throws **[Error][24]** Throws an error if both sample interval and sample rate are missing (sample rate
+    comes from the constructor or the set method).
 
-Returns **[Object][22]** An object containing the estimated gravity vector.
+Returns **[Object][22]** An object containing the estimated gravity vector. The gravity vector
+is normalised and conforms to the API version specified in the constructor.
 
 [1]: #conversion
 
