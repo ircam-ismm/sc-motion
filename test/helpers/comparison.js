@@ -1,21 +1,30 @@
 /**
- * Test whether a value is around a reference, given a tolerance.
+ * @module comparison
+ * @description Comparison utilities for numeric values.
+ */
+
+
+/**
+ * Checks if two numeric values are approximately equal within a given tolerance.
  *
- * @param {Number} value
- * @param {Number} reference
- * @param {Number} [tolerance=Number.EPSILON]
- * @returns {Boolean} true if difference is less than tolerance
+ * @memberof comparison
+ *
+ * @param {number} value - The first value to compare.
+ * @param {number} reference - The second value to compare.
+ * @param {number} [tolerance=Number.EPSILON] - The tolerance within which the
+ * values are considered equal. Note: tolerance must take into account
+ * @returns {boolean} Returns `true` if the values are approximately equal, otherwise `false`.
  */
 export function almostEqual(value, reference, tolerance = Number.EPSILON) {
   const difference = Math.abs(value - reference);
 
   const toleranceAbsolute = tolerance;
-  if(difference <= 2 * toleranceAbsolute) {
+  if(difference <= toleranceAbsolute) {
     return true;
   }
 
   const toleranceRelative = tolerance
-    * Math.max(1, Math.abs(value), Math.abs(reference));
+    * Math.max(Math.abs(value), Math.abs(reference));
 
   if (difference <= toleranceRelative) {
     return true;
@@ -28,6 +37,16 @@ export function almostEqual(value, reference, tolerance = Number.EPSILON) {
   return value === reference;
 }
 
+/**
+ * Checks if two arrays of numeric values are approximately equal element-wise within a given tolerance.
+ *
+ * @memberof comparison
+ *
+ * @param {number[]} value - The first array to compare.
+ * @param {number[]} reference - The second array to compare.
+ * @param {number} [tolerance=Number.EPSILON] - The tolerance within which the array elements are considered equal.
+ * @returns {boolean} Returns `true` if the arrays are approximately equal, otherwise `false`.
+ */
 export function almostEqualArray(value, reference, tolerance = Number.EPSILON) {
   if (value.length !== reference.length) {
     return false;

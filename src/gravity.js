@@ -8,24 +8,56 @@ import {
 
 const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
 
-
+/**
+ * Gravity class for estimating gravity using accelerometer and gyroscope.
+ *
+ * @see https://w3c.github.io/accelerometer/#gravitysensor-interface
+ *
+ * @example
+ *
+ * import { Gravity } from '@ircam/sc-motion/gravity.js';
+ *
+ * const gravityProcessor = new Gravity({ api: 'v3'});
+ *
+ * let motionSensor;
+ * let gravity;
+ *
+ * motionSensor = {
+ *   accelerometer: { x: 9.81, y: 0, z: 0 },
+ *   gyroscope: { x: 0, y: 0, z: 0 },
+ *   sampleTime: 0,
+ * };
+ * ({ gravity } = gravityProcessor.process(motionSensor) );
+ * console.log(gravity);
+ * // { gravity: { x: 9.80665, y: 0, z: 0 } }
+ *
+ * motionSensor = {
+ *   accelerometer: { x: 4.40, y: 4.40, z: 0 },
+ *   gyroscope: { x: -0.001, y: -0.001, z: 0 },
+ *   sampleTime: 0.01,
+ * };
+ * ({ gravity } = gravityProcessor.process(motionSensor) );
+ * console.log(gravity);
+ * // { gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 } }
+ */
 export class Gravity {
 
   /**
-   * Creates an instance of the Gravity class.
+   * Constructs a new instance of the Gravity class, to allow for processing
+   * accelerometer and gyroscope data streams, in order to estimate the gravity over time.
    *
-   * @param {Object} [options={}] - Configuration options for the Gravity
-   * instance.
-   * @param {string} [options.api='v3'] - The API version to use.
-   * @param {number} [options.gyroscopeWeightLinear=0.9] - The linear weight for
-   * the gyroscope.
-   * @param {number} [options.sampleRate] - The sample rate in hertz, if
-   * sampleTime is not provided in process.
+   * @param {Object} [options={}] - Configuration options for the Gravity instance.
+   * @param {string} [options.api] - The API version for the input and output data.
+   * Current version is 'v3'.
+   * @param {number} [options.gyroscopeWeightLinear=0.9] - The linear weight for the gyroscope.
+   * @param {number} [options.sampleRate=undefined] - The sample rate for processing. Used
+   * if sampleTime is not provided when processing.
+   *
    */
   constructor({
-    api = 'riot-v2-array',
+    api,
     gyroscopeWeightLinear = 0.9,
-    sampleRate,
+    sampleRate = undefined,
   } = {}) {
     this.set({
       api,
@@ -36,6 +68,11 @@ export class Gravity {
     this.reset();
   }
 
+  /**
+   * Resets the internal state of the Gravity instance.
+   * Clears the last recorded sample time and resets the
+   * accelerometer and gyroscope estimates to null.
+   */
   reset() {
     this.sampleTimeLast = null;
 
@@ -46,8 +83,10 @@ export class Gravity {
 
   /**
    * Sets the attributes of the Gravity object.
+   *
    * @param {Object} attributes - The attributes to be set. Same as constructor
    * options.
+   *
    */
   set(attributes) {
     const { sampleRate } = attributes;
@@ -71,6 +110,20 @@ export class Gravity {
     Object.assign(this, attributes);
   }
 
+  /**
+   * Processes accelerometer and gyroscope data to estimate gravity.
+   *
+   * accelerometer, gyroscope and gravity conform to the `api` version specified in the constructor.
+   *
+   * @param {Object} [params={}] - The input parameters.
+   * @param {number[]} params.accelerometer - The accelerometer data, conforming to the API version.
+   * @param {number[]} params.gyroscope - The gyroscope data, conforming to the API version.
+   * @param {number} [params.sampleTime] - The timestamp of the current sample in seconds.
+   * @returns {Object} An object containing the estimated gravity vector.
+   * @throws {Error} Throws an error if accelerometer data is missing.
+   * @throws {Error} Throws an error if gyroscope data is missing.
+   * @throws {Error} Throws an error if both sample interval and sample rate are missing.
+   */
   process({
     accelerometer,
     gyroscope,
@@ -84,8 +137,8 @@ export class Gravity {
       throw new Error('Gravity: Missing gyroscope data');
     }
 
-    if (!sampleTime && !this.sampleRate) {
-      throw new Error('Gravity: Missing sample interval and sample rate');
+    if (typeof sampleTime === undefined && !this.sampleRate) {
+      throw new Error('Gravity: Missing sample time and sample rate');
     }
 
     // same as PiPoOrientation (riot-v1)
@@ -107,7 +160,13 @@ export class Gravity {
       this.accelerometerEstimate = accelerometerInput;
       this.gyroscopeEstimate = gyroscopeInput;
 
-      return { gravity: accelerometerInput };
+      const { gravity } = apiConvert({
+        inputApi: 'riot-v1-array',
+        outputApi: this.api,
+        gravity: this.accelerometerEstimate,
+      });
+
+      return { gravity };
     }
 
     const deltaTime = (sampleTime
@@ -115,8 +174,9 @@ export class Gravity {
       : 1 / this.sampleRate
     );
 
-    // integrate angle from gyro current values and last result
-    // get angles between projection of R on ZX/ZY plane and Z axis, based on last accEstimate
+    // Integrate angle from gyro current values and last result
+    // get angles between projection of R on ZX/ZY plane and Z axis,
+    // based on last accEstimate.
 
     // gyroscopeInput in deg/s, delta and angle in rad
     const rollDelta = degreeToRadian(gyroscopeInput[0]) * deltaTime;
@@ -129,7 +189,7 @@ export class Gravity {
       this.accelerometerEstimate[2])
       + pitchDelta;
 
-    // calculate projection vector from angle Estimates
+    // calculate projection vector from angle estimate
     this.gyroscopeEstimate[0] = sin(rollAngle);
     this.gyroscopeEstimate[0] /= sqrt(1 + pow(cos(rollAngle), 2)
       * pow(tan(pitchAngle), 2));
@@ -138,7 +198,7 @@ export class Gravity {
     this.gyroscopeEstimate[1] /= sqrt(1 + pow(cos(pitchAngle), 2)
       * pow(tan(rollAngle), 2));
 
-    // estimate sign of RzGyro by looking in what qudrant the angle Axz is,
+    // estimate sign of RzGyro by looking in what quadrant the angle Axz is,
     // RzGyro is positive if  Axz in [-pi/2, pi/2] => cos(Awz) >= 0
     const signYaw = cos(rollAngle) >= 0 ? 1 : -1;
 

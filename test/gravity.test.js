@@ -31,7 +31,6 @@ const data = {
 
 before( async () => {
 
-
   const parametersFilename = 'gravity-pipo-record-parameters.json';
   const dataFilename = 'gravity-pipo-record.json';
 
@@ -155,10 +154,14 @@ suite('data integrity', () => {
 
 suite('gravity', () => {
 
-
   test('constructor with default parameters', () => {
-    const gravity = new Gravity();
+
+    // api is mandatory
+    assert.throws(() => new Gravity() );
+
+    const gravity = new Gravity({api: 'v3'});
     assert.ok(gravity);
+
   });
 
   test('constructor with good parameters', () => {
@@ -261,8 +264,6 @@ suite('gravity', () => {
       numRuns: data.input.length,
       ...debugOptions,
     });
-
-
 
   }); // 'compare with pipo'
 

@@ -1,8 +1,12 @@
 .babelrc
 .editorconfig
 .editorbackup
+.eslintrc
+.gitignore
+.npmignore
+
 TODO.md
 
 docs
-tests
+test
 examples

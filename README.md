@@ -1,12 +1,12 @@
-# @ircam/sc-signal
+# @ircam/sc-motion
 
-Simple signal processing utilities.
+Simple motion processing utilities.
 
 ## Install
 
 ```sh
 
-npm install --save @ircam/sc-signal
+npm install --save @ircam/sc-motion
 
 ```
 
@@ -17,285 +17,320 @@ npm install --save @ircam/sc-signal
 
 ### Table of Contents
 
-*   [Clipper][1]
-*   [Hysteresis][2]
-*   [Lowpass][3]
-*   [Scaler][4]
+*   [conversion][1]
+    *   [Examples][2]
+    *   [degreeToRadian][3]
+    *   [radianToDegree][4]
+    *   [g][5]
+    *   [gToNewton][6]
+    *   [newtonToG][7]
+    *   [arrayNormaliseInPlace][8]
+    *   [xyzToArray][9]
+    *   [arrayToXyz][10]
+    *   [alphaBetaGammaToArray][11]
+    *   [arrayToAlphaBetaGamma][12]
+    *   [apiConvert][13]
+*   [Gravity][14]
+    *   [Parameters][15]
+    *   [Examples][16]
+    *   [reset][17]
+    *   [set][18]
+    *   [process][19]
 
-## Clipper
+## conversion
 
-Represents a Clipper object that limits the range of input values.
-
-### Parameters
-
-*   `$0` **[Object][5]**  (optional, default `{}`)
-
-    *   `$0.min`   (optional, default `-Infinity`)
-    *   `$0.max`   (optional, default `Infinity`)
-*   `options` **[Object][5]?** The options object.
-
-### Examples
-
-```javascript
-// clip to [0,1]
-const clipper = new Clipper({
- min: 0,
- max: 1,
-});
-
-clipper.process(0.5); // 0.5
-clipper.process(2); // 1
-clipper.process(-1); // 0
-```
-
-```javascript
-// min only
-const clipper = new Clipper({
-  min: 0,
-});
-
-clipper.process(0.5); // 0.5
-clipper.process(2); // 2
-clipper.process(-1); // 0
-```
-
-### set
-
-Sets the attributes of the Clipper object.
-
-#### Parameters
-
-*   `attributes` **[Object][5]** The attributes to be set. Same as constructor options.
-
-### process
-
-Processes the input value and returns the clipped value within the specified range.
-
-#### Parameters
-
-*   `inputValue` **[number][6]** The input value to be processed.
-
-Returns **[number][6]** The clipped value within the specified range.
-
-## Hysteresis
-
-Represents an Hysteresis filter.
-
-### Parameters
-
-*   `$0` **[Object][5]**  (optional, default `{}`)
-
-    *   `$0.sampleRate`   (optional, default `2`)
-    *   `$0.lowpassFrequencyUp`   (optional, default `0.5`)
-    *   `$0.lowpassFrequencyDown`   (optional, default `0.5`)
-*   `options` **[Object][5]?** The options object.
+Conversion utilities for sensor data.
 
 ### Examples
 
 ```javascript
-// hysteresis with quick up and slow down
-const hysteresis = new Hysteresis({
- sampleRate: 2, // normalised frequency
- lowpassFrequencyUp: 0.9,
- lowpassFrequencyDown: 0.1,
-});
+import { xyzToArray } from '@ircam/sc-motion/conversion.js';
 
-hysteresis.process(0); // 0
-hysteresis.process(1); // 0.9
-hyteresis.process(1); // 0.99
-hysteresis.process(1); // 0.999
-hysteresis.process(1); // 0.9999
-hysteresis.process(1); // 0.99999
-hysteresis.process(1); // 0.999999
-hysteresis.process(0); // 0.899999
-hysteresis.process(0); // 0.809999
-hysteresis.process(0); // 0.728999
-hysteresis.process(0); // 0.656099
-hysteresis.process(0); // 0.590489
+const accelerometer = { x: 9.81, y: 0, z: 0 };
+const accelerometerArray = xyzToArray(accelerometer);
+console.log({ accelerometer, accelerometerArray });
+// {
+//  accelerometer: { x: 9.81, y: 0, z: 0 },
+//  accelerometerArray: [ 9.81, 0, 0 ]
+// }
 ```
 
-### set
+### degreeToRadian
 
-Sets the attributes of the Hysteresis filter.
-
-#### Parameters
-
-*   `attributes` **[Object][5]** The attributes to set. Same as constructor options.
-
-### init
-
-Initializes the Hysteresis filter.
-
-### process
-
-Processes the input value through the Hysteresis filter.
+Converts an angle from degrees to radians.
 
 #### Parameters
 
-*   `inputValue` **[number][6]** The input value to process.
+*   `angle` **[number][20]** The angle in degrees to be converted.
 
-Returns **[number][6]** The output value of the Hysteresis filter.
+Returns **[number][20]** The angle in radians.
+
+### radianToDegree
+
+Converts an angle from radians to degrees.
+
+#### Parameters
+
+*   `angle` **[number][20]** The angle in radians to be converted.
+
+Returns **[number][20]** The angle converted to degrees.
+
+### g
+
+The standard acceleration due to gravity (g) in meters per second squared (m/s²).
+
+Type: [number][20]
+
+### gToNewton
+
+Converts a value from g-force (g) to Newtons (N).
+
+#### Parameters
+
+*   `force` **[number][20]** The value in g-force to be converted.
+
+Returns **[number][20]** The equivalent value in Newtons.
+
+### newtonToG
+
+Converts a value from Newtons to G-force.
+
+#### Parameters
+
+*   `force` **[number][20]** The value in Newtons to be converted.
+
+Returns **[number][20]** The equivalent value in G-force.
+
+### arrayNormaliseInPlace
+
+Normalises a 3D vector in place and returns its original magnitude.
+
+This function modifies the input array `array` directly by dividing each of its
+components by the vector's magnitude (Euclidean norm). If the magnitude is
+zero, the vector remains unchanged.
+
+#### Parameters
+
+*   `array` **[Array][21]<[number][20]>** A 3-element array representing the 3D vector to normalise.
+
+Returns **[number][20]** The original magnitude (Euclidean norm) of the vector.
+
+### xyzToArray
+
+Converts an object with x, y, and z properties into an array.
+
+#### Parameters
+
+*   `coordinates` **[Object][22]** The object containing x, y, and z properties.
+
+    *   `coordinates.x` **[number][20]** The x-coordinate value.
+    *   `coordinates.y` **[number][20]** The y-coordinate value.
+    *   `coordinates.z` **[number][20]** The z-coordinate value.
+
+Returns **[Array][21]<[number][20]>** An array containing the x, y, and z values in order.
+
+### arrayToXyz
+
+Converts an array of three numerical values into an object with `x`, `y`,
+and `z` properties.
+
+#### Parameters
+
+*   `coordinates` **[Array][21]<[number][20]>** An array containing three numbers \[x, y, z].
+
+    *   `coordinates.0` &#x20;
+    *   `coordinates.1` &#x20;
+    *   `coordinates.2` &#x20;
+
+Returns **{x: [number][20], y: [number][20], z: [number][20]}** An object with `x`, `y`,
+and `z` properties corresponding to the input array values.
+
+### alphaBetaGammaToArray
+
+Converts an object containing alpha, beta, and gamma properties into an array.
+
+#### Parameters
+
+*   `angle` **[Object][22]** The input object.
+
+    *   `angle.alpha` **[number][20]** The alpha value.
+    *   `angle.beta` **[number][20]** The beta value.
+    *   `angle.gamma` **[number][20]** The gamma value.
+
+Returns **[Array][21]<[number][20]>** An array containing the alpha, beta, and gamma values in order.
+
+### arrayToAlphaBetaGamma
+
+Converts an array of three elements into an object with properties alpha, beta, and gamma.
+
+#### Parameters
+
+*   `$0` **[Array][21]**&#x20;
+
+    *   `$0.0` &#x20;
+    *   `$0.1` &#x20;
+    *   `$0.2` &#x20;
+*   `angle` **[Array][21]<[number][20]>** An array containing three numeric elements \[alpha, beta, gamma].
+*   `angle` **[number][20]** \[0] - The alpha value.
+*   `angle` **[number][20]** \[1] - The beta value.
+*   `angle` **[number][20]** \[2] - The gamma value.
+
+Returns **{alpha: [number][20], beta: [number][20], gamma: [number][20]}** An object with properties alpha, beta, and gamma.
+
+### apiConvert
+
+*   **See**: inputApiValid
+*   **See**: outputApiValid
+
+Copy and converts sensor data between different API formats.
+
+#### Parameters
+
+*   `options` **[Object][22]** The conversion options.
+
+    *   `options.inputApi` **[string][23]?** The input API format.
+    *   `options.outputApi` **[string][23]?** The output API format.
+    *   `options.accelerometer` **([Object][22] | [Array][21])?** The accelerometer data to convert.
+    *   `options.gyroscope` **([Object][22] | [Array][21])?** The gyroscope data to convert.
+    *   `options.gravity` **([Object][22] | [Array][21])?** The gravity data to convert.
+
+<!---->
+
+*   Throws **[Error][24]** If the conversion between the specified input and output APIs is unsupported.
+
+Returns **[Object][22]** The converted sensor data. The output is a deep copy of the input
+data, even if the input and output APIs are the same.
+
+## Gravity
+
+*   **See**: [https://w3c.github.io/accelerometer/#gravitysensor-interface][25]
+
+Gravity class for estimating gravity using accelerometer and gyroscope.
+
+### Parameters
+
+*   `$0` **[Object][22]**  (optional, default `{}`)
+
+    *   `$0.api` &#x20;
+    *   `$0.gyroscopeWeightLinear`   (optional, default `0.9`)
+    *   `$0.sampleRate`   (optional, default `undefined`)
+*   `options` **[Object][22]** Configuration options for the Gravity instance. (optional, default `{}`)
+
+### Examples
+
+```javascript
+import { Gravity } from '@ircam/sc-motion/gravity.js';
+
+const gravityProcessor = new Gravity({ api: 'v3'});
+
+let motionSensor;
+let gravity;
+
+motionSensor = {
+  accelerometer: { x: 9.81, y: 0, z: 0 },
+  gyroscope: { x: 0, y: 0, z: 0 },
+  sampleTime: 0,
+};
+({ gravity } = gravityProcessor.process(motionSensor) );
+console.log(gravity);
+// { gravity: { x: 9.80665, y: 0, z: 0 } }
+
+motionSensor = {
+  accelerometer: { x: 4.40, y: 4.40, z: 0 },
+  gyroscope: { x: -0.001, y: -0.001, z: 0 },
+  sampleTime: 0.01,
+};
+({ gravity } = gravityProcessor.process(motionSensor) );
+console.log(gravity);
+// { gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 } }
+```
 
 ### reset
 
-Resets the Hysteresis filter.
-
-## Lowpass
-
-Represents a Lowpass filter.
-
-### Parameters
-
-*   `$0` **[Object][5]**  (optional, default `{}`)
-
-    *   `$0.sampleRate`   (optional, default `2`)
-    *   `$0.lowpassFrequency`   (optional, default `0.5`)
-*   `options` **[Object][5]?** The options object.
-
-### Examples
-
-```javascript
-const lowpass = new Lowpass({
-sampleRate: 2, // normalised frequency
-lowpassFrequency: 0.9,
-});
-
-lowpass.process(0); // 0
-lowpass.process(1); // 0.9
-lowpass.process(1); // 0.99
-lowpass.process(1); // 0.999
-lowpass.process(1); // 0.9999
-lowpass.process(1); // 0.99999
-lowpass.process(1); // 0.999999
-```
+Resets the internal state of the Gravity instance.
+Clears the last recorded sample time and resets the
+accelerometer and gyroscope estimates to null.
 
 ### set
 
-Sets the attributes of the Lowpass filter.
+Sets the attributes of the Gravity object.
 
 #### Parameters
 
-*   `attributes` **[Object][5]** The attributes to set. Same as constructor options.
-
-### init
-
-Initializes the Lowpass filter.
+*   `attributes` **[Object][22]** The attributes to be set. Same as constructor
+    options.
 
 ### process
 
-Processes the input value through the Lowpass filter.
+Processes accelerometer and gyroscope data to estimate gravity.
+
+accelerometer, gyroscope and gravity conform to the `api` version specified in the constructor.
 
 #### Parameters
 
-*   `inputValue` **[number][6]** The input value to process.
+*   `params` **[Object][22]** The input parameters. (optional, default `{}`)
 
-Returns **[number][6]** The filtered output value.
+    *   `params.accelerometer` **[Array][21]<[number][20]>** The accelerometer data, conforming to the API version.
+    *   `params.gyroscope` **[Array][21]<[number][20]>** The gyroscope data, conforming to the API version.
+    *   `params.sampleTime` **[number][20]?** The timestamp of the current sample in seconds.
 
-### reset
+<!---->
 
-Resets the Lowpass filter.
+*   Throws **[Error][24]** Throws an error if accelerometer data is missing.
+*   Throws **[Error][24]** Throws an error if gyroscope data is missing.
+*   Throws **[Error][24]** Throws an error if both sample interval and sample rate are missing.
 
-## Scaler
+Returns **[Object][22]** An object containing the estimated gravity vector.
 
-Represents a Scaler that maps values from an input range to an output range.
+[1]: #conversion
 
-### Parameters
+[2]: #examples
 
-*   `$0` **[Object][5]**  (optional, default `{}`)
+[3]: #degreetoradian
 
-    *   `$0.inputStart`   (optional, default `0`)
-    *   `$0.inputEnd`   (optional, default `1`)
-    *   `$0.outputStart`   (optional, default `0`)
-    *   `$0.outputEnd`   (optional, default `1`)
-    *   `$0.clip`   (optional, default `false`)
-    *   `$0.type`   (optional, default `'linear'`)
-    *   `$0.base`   (optional, default `1`)
-*   `options` **[Object][5]?** The options object.
+[4]: #radiantodegree
 
-### Examples
+[5]: #g
 
-```javascript
-// linear
-const scaler = new Scaler({
-  inputStart: 0,
-  inputEnd: 10,
-  outputStart: 0,
-  outputEnd: 100,
-});
+[6]: #gtonewton
 
-scaler.process(5); // 50
-scaler.process(0); // 0
-scaler.process(10); // 100
-```
+[7]: #newtontog
 
-```javascript
-// MIDI pitch to Hertz
-const scaler = new Scaler({
-  inputStart: 69,
-  inputEnd: 81,
-  outputStart: 440,
-  outputEnd: 880,
-  type: 'exponential',
-  base: 2,
-  clip: false,
-});
+[8]: #arraynormaliseinplace
 
-scaler.process(69); // 440
-scaler.process(81); // 880
-scaler.process(72); // 523.251131
-scaler.process(93); // 1760 (no clipping)
-```
+[9]: #xyztoarray
 
-```javascript
-// decibel to amplitude
-const scaler = new Scaler({
-  inputStart: 0,
-  inputEnd: 20,
-  outputStart: 1,
-  outputEnd: 10,
-  type: 'exponential',
-  base: 10,
-  clip: false,
-});
+[10]: #arraytoxyz
 
-scaler.process(0); // 1
-scaler.process(20); // 10
-scaler.process(-20); // 0.1 (no clipping)
-```
+[11]: #alphabetagammatoarray
 
-### set
+[12]: #arraytoalphabetagamma
 
-Set the scaler attributes.
+[13]: #apiconvert
 
-#### Parameters
+[14]: #gravity
 
-*   `attributes` **[Object][5]** The attributes to set. Same as constructor options.
+[15]: #parameters-10
 
-### init
+[16]: #examples-1
 
-Initialize the scaler.
+[17]: #reset
 
-### process
+[18]: #set
 
-Process the input value and return the scaled value.
+[19]: #process
 
-#### Parameters
+[20]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-*   `inputValue` **[number][6]** The input value to scale.
+[21]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-Returns **[number][6]** The scaled output value.
+[22]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[1]: #clipper
+[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[2]: #hysteresis
+[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error
 
-[3]: #lowpass
-
-[4]: #scaler
-
-[5]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
-
-[6]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+[25]: https://w3c.github.io/accelerometer/#gravitysensor-interface
 
 <!-- apistop -->
 
