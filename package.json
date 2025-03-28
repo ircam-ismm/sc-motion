@@ -11,6 +11,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ircam-ismm/sc-motion"
+  },
+  "bugs": {
+    "url": "https://github.com/ircam-ismm/sc-motion/issues"
+  },
   "exports": {
     ".": "./src/index.js",
     "./*.js": "./src/*.js"
