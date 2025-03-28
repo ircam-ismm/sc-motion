@@ -4,6 +4,7 @@
 .eslintrc
 .gitignore
 .npmignore
+.tern-port
 
 TODO.md
 

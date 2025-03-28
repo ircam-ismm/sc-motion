@@ -248,7 +248,6 @@ export const apiValid = [
  * Validates if the provided API is included in the list of valid  APIs.
  *
  * @memberof format
- * @private
  *
  * @param {string} api - The API name to validate.
  * @returns {boolean} Returns `true` if the API is valid, otherwise `false`.
