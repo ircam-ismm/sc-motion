@@ -135,6 +135,7 @@ export class Gravity {
    * @returns {dataXyz|dataArray} An object containing the estimated gravity vector. The gravity vector
    * is normalised and conforms to the output API version specified in the constructor.
    *
+   * @throws {Error} Throws an error if API version is missing.
    * @throws {Error} Throws an error if accelerometer data is missing.
    * @throws {Error} Throws an error if gyroscope data is missing.
    * @throws {Error} Throws an error if both sample interval and sample rate are missing (sample rate
@@ -146,6 +147,10 @@ export class Gravity {
     gyroscope,
     sampleTime,
   } = {}) {
+    if (!api) {
+      throw new Error('Gravity: Missing API version');
+    }
+
     if (!accelerometer) {
       throw new Error('Gravity: Missing accelerometer data');
     }
