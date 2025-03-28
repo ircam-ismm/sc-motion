@@ -355,6 +355,7 @@ accelerometer, gyroscope and gravity conform to the `api` version.
 
 <!---->
 
+*   Throws **[Error][28]** Throws an error if API version is missing.
 *   Throws **[Error][28]** Throws an error if accelerometer data is missing.
 *   Throws **[Error][28]** Throws an error if gyroscope data is missing.
 *   Throws **[Error][28]** Throws an error if both sample interval and sample rate are missing (sample rate
