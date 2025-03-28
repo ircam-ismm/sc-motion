@@ -19,12 +19,10 @@ import {
   arrayToAlphaBetaGamma,
 
   apiConvert,
-  inputApiValid,
-  inputApiValidate,
-  outputApiValid,
-  outputApiValidate,
+  apiValid,
+  apiValidate,
   arrayNormaliseInPlace,
-} from '@ircam/sc-motion/conversion.js';
+} from '../src/format.js';
 
 suite('conversion', () => {
 
@@ -188,7 +186,7 @@ suite('conversion', () => {
 
   suite('apiConvert', () => {
 
-    test('no change when inputApi === outputApi', () => {
+    test('no change when api === outputApi', () => {
 
       // replace with replay options, like
       // { seed: 824551551, path: "0", endOnFailure: true }
@@ -200,15 +198,17 @@ suite('conversion', () => {
           fc.float(), fc.float(), fc.float(),
           fc.float(), fc.float(), fc.float(),
           (accX, accY, accZ, gyrX, gyrY, gyrZ, graX, graY, graZ) => {
-            inputApiValid.forEach(inputApi => {
-              const outputApi = inputApi;
-              const input = (inputApi === 'v3'
+            apiValid.forEach(api => {
+              const outputApi = api;
+              const input = (api === 'v3'
                 ? {
+                  api,
                   accelerometer: { x: accX, y: accY, z: accZ },
                   gyroscope: { x: gyrX, y: gyrY, z: gyrZ },
                   gravity: { x: graX, y: graY, z: graZ },
                 }
                 : {
+                  api,
                   accelerometer: [accX, accY, accZ],
                   gyroscope: [gyrX, gyrY, gyrZ],
                   gravity: [graX, graY, graZ],
@@ -218,22 +218,21 @@ suite('conversion', () => {
               assert.deepStrictEqual(
                 input,
                 apiConvert({
-                  inputApi,
+                  ...input,
                   outputApi,
-                  ...input
                 }),
-                `${JSON.stringify({ inputApi, outputApi, ...input })}`,
+                `${JSON.stringify({ ...input , outputApi })}`,
               );
             });
           }), {
         ...debugOptions,
       });
 
-    }); // inputApi === outputApi
+    }); // api === outputApi
 
 
     function apiConvertValidate({
-      inputApi,
+      api,
       outputApi,
       examples,
       debugOptions,
@@ -243,21 +242,23 @@ suite('conversion', () => {
         fc.property(
           // input
           fc.record({
-            accelerometer: (inputApi === 'v3'
+            api: fc.constant(api),
+            accelerometer: (api === 'v3'
               ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
-            gyroscope: (inputApi === 'v3'
+            gyroscope: (api === 'v3'
               ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
-            gravity: (inputApi === 'v3'
+            gravity: (api === 'v3'
               ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
           }),
           // output
           fc.record({
+            api: fc.constant(outputApi),
             accelerometer: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
             gyroscope: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
             gravity: fc.array(fc.float(), { minLength: 3, maxLength: 3 }),
@@ -269,39 +270,36 @@ suite('conversion', () => {
               && run++ < examples.length) {
 
               const output = apiConvert({
-                inputApi,
+                ...input,
                 outputApi,
-                ...input
               });
               ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
                 assert(almostEqualArray(
                   output[key], outputExpected[key]),
                   `example: ${JSON.stringify({
-                    inputApi, outputApi,
-                    input, output, outputExpected,
+                    input, outputApi,
+                    output, outputExpected,
                   })}`);
               });
             } // examples
 
             const output = apiConvert({
-              inputApi,
+              ...input,
               outputApi,
-              ...input
             });
             const inputReverted = apiConvert({
-              inputApi: outputApi,
-              outputApi: inputApi,
               ...output,
+              outputApi: api,
             });
 
             ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
               assert(
-                (inputApi === 'v3'
+                (api === 'v3'
                   ? almostEqualArray(xyzToArray(input[key]), xyzToArray(inputReverted[key]))
                   : almostEqualArray(input[key], inputReverted[key])
                 ),
                 `reverted: ${JSON.stringify({
-                  inputApi, outputApi, input,
+                  input, outputApi,
                 })}`);
             });
 
@@ -313,19 +311,21 @@ suite('conversion', () => {
 
     test('from v3 to v1-array and back', () => {
 
-      const inputApi = 'v3';
+      const api = 'v3';
       const outputApi = 'riot-v1-array';
 
       const examples = [
         [
           {
             // input
+            api,
             accelerometer: { x: 0, y: 0, z: 0 },
             gyroscope: { x: 0, y: 0, z: 0 },
             gravity: { x: 0, y: 0, z: 0 },
           },
           {
             // output
+            api: outputApi,
             accelerometer: [0, 0, 0],
             gyroscope: [0, 0, 0],
             gravity: [0, 0, 0],
@@ -334,12 +334,14 @@ suite('conversion', () => {
         [
           {
             // input
+            api,
             accelerometer: { x: 1, y: 2, z: 3 },
             gyroscope: { x: 4, y: 5, z: 6 },
             gravity: { x: 7, y: 8, z: 9},
           },
           {
             // output
+            api: outputApi,
             accelerometer: [-2 / g, 1 / g, 3 / g],
             gyroscope: [-5, -6, 4],
             gravity: [-8 / g, 7 / g, 9 / g],
@@ -353,7 +355,7 @@ suite('conversion', () => {
       const debugOptions = {};
 
       apiConvertValidate({
-        inputApi,
+        api,
         outputApi,
         examples,
         debugOptions,
@@ -364,19 +366,21 @@ suite('conversion', () => {
 
     test('from v2-array to v1-array and back', () => {
 
-      const inputApi = 'riot-v2-array';
+      const api = 'riot-v2-array';
       const outputApi = 'riot-v1-array';
 
       const examples = [
         [
           {
             // input
+            api,
             accelerometer: [0, 0, 0],
             gyroscope: [0, 0, 0],
             gravity: [0, 0, 0],
           },
           {
             // output
+            api: outputApi,
             accelerometer: [0, 0, 0],
             gyroscope: [0, 0, 0],
             gravity: [0, 0, 0],
@@ -385,12 +389,14 @@ suite('conversion', () => {
         [
           {
             // input
+            api,
             accelerometer: [1, 2, 3],
             gyroscope: [4, 5, 6],
             gravity: [7, 8, 9],
           },
           {
             // output
+            api: outputApi,
             accelerometer: [1, 2, 3],
             gyroscope: [-5 * 1e3, 4 * 1e3, 6 * 1e3],
             gravity: [7, 8, 9],
@@ -404,7 +410,7 @@ suite('conversion', () => {
       const debugOptions = {};
 
       apiConvertValidate({
-        inputApi,
+        api,
         outputApi,
         examples,
         debugOptions,

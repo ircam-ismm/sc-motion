@@ -13,9 +13,8 @@ import {
   apiConvert,
   gToNewton,
   arrayNormaliseInPlace,
-  inputApiValid,
-  outputApiValid
-} from '@ircam/sc-motion/conversion.js';
+  apiValid,
+} from '../src/format.js';
 
 const localFileName = fileURLToPath(import.meta.url);
 const localPath = path.dirname(localFileName);
@@ -156,10 +155,10 @@ suite('gravity', () => {
 
   test('constructor with default parameters', () => {
 
-    // api is mandatory
+    // outputApi is mandatory
     assert.throws(() => new Gravity() );
 
-    const gravity = new Gravity({api: 'v3'});
+    const gravity = new Gravity({outputApi: 'v3'});
     assert.ok(gravity);
 
   });
@@ -167,11 +166,11 @@ suite('gravity', () => {
   test('constructor with good parameters', () => {
 
     fc.assert(fc.property(
-      fc.constantFrom(...inputApiValid),
+      fc.constantFrom(...apiValid),
       fc.float({ min: 0, max: 1., noNaN: true }),
       fc.float({ min: 0, minExcluded: true, noNaN: true }),
-      (api, gyroscopeWeightLinear, sampleRate) => {
-        const gravity = new Gravity({ api, gyroscopeWeightLinear, sampleRate });
+      (outputApi, gyroscopeWeightLinear, sampleRate) => {
+        const gravity = new Gravity({ outputApi, gyroscopeWeightLinear, sampleRate });
         assert.ok(gravity);
       }),
     );
@@ -180,7 +179,7 @@ suite('gravity', () => {
 
   suite('constructor with bad parameters', () => {
 
-    const apiGood = fc.constantFrom(...inputApiValid);
+    const apiGood = fc.constantFrom(...apiValid);
     const gyroscopeWeightLinearGood = fc.float({ min: 0, max: 1. });
     const sampleRateGood = fc.float({ min: 0, minExcluded: true });
 
@@ -188,12 +187,12 @@ suite('gravity', () => {
 
     test('bad api', () => {
       fc.assert(fc.property(
-        fc.string().filter(s => !inputApiValid.includes(s)),
+        fc.string().filter(s => !apiValid.includes(s)),
         gyroscopeWeightLinearGood,
         sampleRateGood,
-        (api, gyroscopeWeightLinear, sampleRate) => {
+        (outputApi, gyroscopeWeightLinear, sampleRate) => {
           assert.throws(() => {
-            new Gravity({ api, gyroscopeWeightLinear, sampleRate })
+            new Gravity({ outputApi, gyroscopeWeightLinear, sampleRate })
           });
         }), {
           ...debugOptions,
@@ -238,7 +237,7 @@ suite('gravity', () => {
     const tolerance = 1e-5;
 
     const gravityProcessor = new Gravity({
-      api,
+      outputApi: api,
       gyroscopeWeightLinear,
       sampleRate,
     });
@@ -254,6 +253,7 @@ suite('gravity', () => {
         const { gravity: gravityExpected } = data.output[run];
 
         const { gravity } = gravityProcessor.process({
+          api,
           accelerometer,
           gyroscope,
         });

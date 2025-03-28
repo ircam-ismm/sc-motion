@@ -1,12 +1,12 @@
 import {
   apiConvert,
-  inputApiValidate,
+  apiValidate,
   degreeToRadian,
-  gToNewton,
   arrayNormaliseInPlace,
-} from './conversion.js';
+} from './format.js';
 
 const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
+
 
 /**
  * Gravity class for estimating gravity using accelerometer and gyroscope.
@@ -18,28 +18,36 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *
  * import { Gravity } from '@ircam/sc-motion/gravity.js';
  *
- * const gravityProcessor = new Gravity({ api: 'v3'});
+ * const gravityProcessor = new Gravity({ outputApi: 'v3'});
  *
  * let motionSensor;
  * let gravity;
  *
  * motionSensor = {
+ *   api: 'v3',
  *   accelerometer: { x: 9.81, y: 0, z: 0 },
  *   gyroscope: { x: 0, y: 0, z: 0 },
  *   sampleTime: 0,
  * };
  * ({ gravity } = gravityProcessor.process(motionSensor) );
  * console.log(gravity);
- * // { gravity: { x: 9.80665, y: 0, z: 0 } }
+ * // {
+ * //   api: 'v3',
+ * //   gravity: { x: 9.80665, y: 0, z: 0 },
+ * // }
  *
  * motionSensor = {
+ *   api: 'v3',
  *   accelerometer: { x: 4.40, y: 4.40, z: 0 },
  *   gyroscope: { x: -0.001, y: -0.001, z: 0 },
  *   sampleTime: 0.01,
  * };
  * ({ gravity } = gravityProcessor.process(motionSensor) );
  * console.log(gravity);
- * // { gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 } }
+ * // {
+ * //   api: 'v3',
+ * //   gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 },
+ * // }
  */
 export class Gravity {
 
@@ -48,23 +56,23 @@ export class Gravity {
    * accelerometer and gyroscope data streams, in order to estimate the gravity over time.
    *
    * @param {Object} [options={}] - Configuration options for the Gravity instance.
-   * @param {string} [options.api] - The API version for the input and output data.
+   * @param {string} [options.outputApi] - The API version for the input and output data.
    * Current version is 'v3'.
    * @param {number} [options.gyroscopeWeightLinear=0.9] - The linear weight for the gyroscope.
    * @param {number} [options.sampleRate=undefined] - The sample rate for processing. Used
    * if sampleTime is not provided when processing.
    *
    * @throws {Error} Throws an error if `sampleRate` is not a positive number.
-   * @throws {Error} Throws an error if `api` is invalid.
+   * @throws {Error} Throws an error if `outputApi` is invalid.
    * @throws {Error} Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
    */
   constructor({
-    api,
+    outputApi,
     gyroscopeWeightLinear = 0.9,
     sampleRate = undefined,
   } = {}) {
     this.set({
-      api,
+      outputApi,
       gyroscopeWeightLinear,
       sampleRate,
     });
@@ -85,7 +93,6 @@ export class Gravity {
   }
 
 
-
   /**
    * Sets the attributes for the Gravity instance.
    *
@@ -100,9 +107,9 @@ export class Gravity {
       throw new Error(`Gravity: Invalid sample rate: ${sampleRate}`);
     }
 
-    const { api } = attributes;
-    if (!inputApiValidate(api)) {
-      throw new Error(`Gravity: Invalid API version: ${api}`);
+    const { outputApi } = attributes;
+    if (!apiValidate(outputApi)) {
+      throw new Error(`Gravity: Invalid output API version: ${outputApi}`);
     }
 
     const { gyroscopeWeightLinear } = attributes;
@@ -118,15 +125,15 @@ export class Gravity {
   /**
    * Processes accelerometer and gyroscope data to estimate gravity.
    *
-   * accelerometer, gyroscope and gravity conform to the `api` version specified in the constructor.
+   * accelerometer, gyroscope and gravity conform to the `api` version.
    *
    * @param {Object} [params={}] - The input parameters.
-   * @param {number[]} params.accelerometer - The accelerometer data, conforming to the API version.
-   * @param {number[]} params.gyroscope - The gyroscope data, conforming to the API version.
+   * @param {dataXyz|dataArray} params.accelerometer - The accelerometer data, conforming to the API version.
+   * @param {dataXyz|dataArray} params.gyroscope - The gyroscope data, conforming to the API version.
    * @param {number} [params.sampleTime] - The timestamp of the current sample in seconds.
    *
-   * @returns {Object} An object containing the estimated gravity vector. The gravity vector
-   * is normalised and conforms to the API version specified in the constructor.
+   * @returns {dataXyz|dataArray} An object containing the estimated gravity vector. The gravity vector
+   * is normalised and conforms to the output API version specified in the constructor.
    *
    * @throws {Error} Throws an error if accelerometer data is missing.
    * @throws {Error} Throws an error if gyroscope data is missing.
@@ -134,6 +141,7 @@ export class Gravity {
    * comes from the constructor or the set method).
    */
   process({
+    api,
     accelerometer,
     gyroscope,
     sampleTime,
@@ -156,10 +164,10 @@ export class Gravity {
       accelerometer: accelerometerInput,
       gyroscope: gyroscopeInput,
     } = apiConvert({
-      inputApi: this.api,
-      outputApi: 'riot-v1-array',
+      api,
       accelerometer,
       gyroscope,
+      outputApi: 'riot-v1-array',
     });
 
     arrayNormaliseInPlace(accelerometerInput);
@@ -170,8 +178,8 @@ export class Gravity {
       this.gyroscopeEstimate = gyroscopeInput;
 
       const { gravity } = apiConvert({
-        inputApi: 'riot-v1-array',
-        outputApi: this.api,
+        api: 'riot-v1-array',
+        outputApi: this.outputApi,
         gravity: this.accelerometerEstimate,
       });
 
@@ -239,8 +247,8 @@ export class Gravity {
     this.sampleTimeLast = sampleTime;
 
     const { gravity } = apiConvert({
-      inputApi: 'riot-v1-array',
-      outputApi: this.api,
+      api: 'riot-v1-array',
+      outputApi: this.outputApi,
       gravity: this.accelerometerEstimate,
     });
 

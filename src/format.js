@@ -1,11 +1,11 @@
 /**
- * @module conversion
+ * @module format
  *
- * @description Conversion utilities for sensor data.
+ * @description Format utilities for sensor data.
  *
  * @example
  *
- * import { xyzToArray } from '@ircam/sc-motion/conversion.js';
+ * import { xyzToArray } from '@ircam/sc-motion/format.js';
  *
  * const accelerometer = { x: 9.81, y: 0, z: 0 };
  * const accelerometerArray = xyzToArray(accelerometer);
@@ -15,8 +15,70 @@
  * //  accelerometerArray: [ 9.81, 0, 0 ]
  * // }
  *
+ * @example
+ *
+ * import { apiConvert } from '@ircam/sc-motion/format.js';
+ *
+ * const sensorData = {
+ *   api: 'v3',
+ *   accelerometer: { x: 9.81, y: 0, z: 0 },
+ *   gyroscope: { x: 0, y: 0, z: 0 },
+ * };
+ *
+ * const sensorDataConverted = apiConvert({
+ *  ...sensorData,
+ *  outputApi: 'riot-v2-array',
+ * });
+ *
+ * console.log(sensorDataConverted);
+ * // {
+ * //   api: 'riot-v2-array',
+ * //   accelerometer: [ 0, 9.81, 0 ],
+ * //   gyroscope: [ 0, 0, 0 ],
+ * // }
  */
 
+/**
+ * Data object with x, y, and z properties, for API 'v3'.
+ *
+ * @typedef {Object} dataXyz
+ * @memberof format
+ *
+ * @property {number} x - The x-coordinate value.
+ * @property {number} y - The y-coordinate value.
+ * @property {number} z - The z-coordinate value.
+ */
+
+/**
+ * Data object with alpha, beta and gamma properties, for API 'v3'.
+ *
+ * @typedef {Object} dataAlphaBetaGamma
+ * @memberof format
+ *
+ * @property {number} alpha - The x-coordinate value.
+ * @property {number} beta - The y-coordinate value.
+ * @property {number} gamma - The z-coordinate value.
+ */
+
+/**
+ * Data array with three numerical values, for API 'v3'.
+ *
+ * @typedef {number[]} dataArray
+ * @memberof format
+ *
+ * @property {number} 0 - The first coordinate value.
+ * @property {number} 1 - The second coordinate value.
+ * @property {number} 2 - The third coordinate value.
+ *
+ */
+
+/**
+ * Data sensor according to multiple version of the API.
+ *
+ * @typedef {dataXyz|dataAlphaBetaGamma|dataArray} dataMotion
+ * @memberof format
+ *
+ */
 
 const toDeg = 180 / Math.PI;
 const toRad = 1 / toDeg;
@@ -24,7 +86,7 @@ const toRad = 1 / toDeg;
 /**
  * Converts an angle from degrees to radians.
  *
- * @memberof conversion
+ * @memberof format
  *
  * @param {number} angle - The angle in degrees to be converted.
  * @returns {number} The angle in radians.
@@ -36,7 +98,7 @@ export function degreeToRadian(angle) {
 /**
  * Converts an angle from radians to degrees.
  *
- * @memberof conversion
+ * @memberof format
  *
  * @param {number} angle - The angle in radians to be converted.
  * @returns {number} The angle converted to degrees.
@@ -48,7 +110,7 @@ export function radianToDegree(angle) {
 /**
  * The standard acceleration due to gravity (g) in meters per second squared (m/s²).
  *
- * @memberof conversion
+ * @memberof format
  *
  */
 export const g = 9.80665;
@@ -57,7 +119,7 @@ const gInverse = 1 / g;
 /**
  * Converts a value from g-force (g) to Newtons (N).
  *
- * @memberof conversion
+ * @memberof format
  *
  * @param {number} force - The value in g-force to be converted.
  * @returns {number} The equivalent value in Newtons.
@@ -69,7 +131,7 @@ export function gToNewton(force) {
 /**
  * Converts a value from Newtons to G-force.
  *
- * @memberof conversion
+ * @memberof format
  *
  * @param {number} force - The value in Newtons to be converted.
  * @returns {number} The equivalent value in G-force.
@@ -85,9 +147,9 @@ export function newtonToG(force) {
  * components by the vector's magnitude (Euclidean norm). If the magnitude is
  * zero, the vector remains unchanged.
  *
- * @memberof conversion
+ * @memberof format
  *
- * @param {number[]} array - A 3-element array representing the 3D vector to normalise.
+ * @param {dataArray} array - A 3-element array representing the 3D vector to normalise.
  * @returns {number} The original magnitude (Euclidean norm) of the vector.
  */
 export function arrayNormaliseInPlace(array) {
@@ -106,9 +168,9 @@ export function arrayNormaliseInPlace(array) {
 /**
  * Converts an object with x, y, and z properties into an array.
  *
- * @memberof conversion
+ * @memberof format
  *
- * @param {Object} coordinates - The object containing x, y, and z properties.
+ * @param {dataXyz} coordinates - The object containing x, y, and z properties.
  * @param {number} coordinates.x - The x-coordinate value.
  * @param {number} coordinates.y - The y-coordinate value.
  * @param {number} coordinates.z - The z-coordinate value.
@@ -122,10 +184,10 @@ export function xyzToArray({ x, y, z}) {
  * Converts an array of three numerical values into an object with `x`, `y`,
  * and `z` properties.
  *
- * @memberof conversion
+ * @memberof format
  *
- * @param {number[]} coordinates - An array containing three numbers [x, y, z].
- * @returns {{x: number, y: number, z: number}} An object with `x`, `y`,
+ * @param {dataArray} coordinates - An array containing three numbers [x, y, z].
+ * @returns {dataXyz} An object with `x`, `y`,
  * and `z` properties corresponding to the input array values.
  */
 export function arrayToXyz([x, y, z]) {
@@ -135,13 +197,13 @@ export function arrayToXyz([x, y, z]) {
 /**
  * Converts an object containing alpha, beta, and gamma properties into an array.
  *
- * @memberof conversion
+ * @memberof format
  *
- * @param {Object} angle - The input object.
+ * @param {dataAlphaBetaGamma} angle - The input object.
  * @param {number} angle.alpha - The alpha value.
  * @param {number} angle.beta - The beta value.
  * @param {number} angle.gamma - The gamma value.
- * @returns {number[]} An array containing the alpha, beta, and gamma values in order.
+ * @returns {dataArray} An array containing the alpha, beta, and gamma values in order.
  */
 export function alphaBetaGammaToArray({ alpha, beta, gamma }) {
   return [alpha, beta, gamma];
@@ -150,22 +212,22 @@ export function alphaBetaGammaToArray({ alpha, beta, gamma }) {
 /**
  * Converts an array of three elements into an object with properties alpha, beta, and gamma.
  *
- * @memberof conversion
+ * @memberof format
  *
- * @param {number[]} angle - An array containing three numeric elements [alpha, beta, gamma].
+ * @param {dataArray} angle - An array containing three numeric elements [alpha, beta, gamma].
  * @param {number} angle[0] - The alpha value.
  * @param {number} angle[1] - The beta value.
  * @param {number} angle[2] - The gamma value.
- * @returns {{alpha: number, beta: number, gamma: number}} An object with properties alpha, beta, and gamma.
+ * @returns {dataAlphaBetaGamma} An object with properties alpha, beta, and gamma.
  */
 export function arrayToAlphaBetaGamma([alpha, beta, gamma]) {
   return { alpha, beta, gamma };
 }
 
 /**
- * A list of valid input API versions supported by the system.
+ * A list of valid API versions supported by the system.
  *
- * @memberof conversion
+ * @memberof format
  * @private
  *
  * @constant {string[]}
@@ -176,83 +238,55 @@ export function arrayToAlphaBetaGamma([alpha, beta, gamma]) {
  * @property {string} riot-v1-array - Represents the Riot API version 1
  * (R-IoT Ircam) in array format, used internally for gravity.
  */
-export const inputApiValid = [
+export const apiValid = [
   'v3',
   'riot-v2-array',
   'riot-v1-array',
 ];
 
 /**
- * Validates if the provided API is included in the list of valid input APIs.
+ * Validates if the provided API is included in the list of valid  APIs.
  *
- * @memberof conversion
+ * @memberof format
  * @private
  *
  * @param {string} api - The API name to validate.
  * @returns {boolean} Returns `true` if the API is valid, otherwise `false`.
  */
-export function inputApiValidate(api) {
-  return inputApiValid.includes(api);
-}
-
-/**
- * A list of valid output API versions supported by the system.
- *
- * @see inputApiValid
- *
- * @memberof conversion
- * @private
- *
- * @constant {string[]}
- */
-export const outputApiValid = [
-  'v3',
-  'riot-v2-array',
-  'riot-v1-array',
-];
-
-/**
- * Validates if the given API is included in the list of valid output APIs.
- *
- * @memberof conversion
- * @private
- *
- * @param {string} api - The API name to validate.
- * @returns {boolean} Returns `true` if the API is valid, otherwise `false`.
- */
-export function outputApiValidate(api) {
-  return outputApiValid.includes(api);
+export function apiValidate(api) {
+  return apiValid.includes(api);
 }
 
 /**
  * Copy and converts sensor data between different API formats.
  *
- * @param {Object} options - The conversion options.
- * @param {string} [options.inputApi] - The input API format.
+ * @param {Object} options - The format options.
+ * @param {string} [options.api] - The input API format.
+ * @param {dataMotion} [options.accelerometer] - The accelerometer data to convert.
+ * @param {dataMotion} [options.gyroscope] - The gyroscope data to convert.
+ * @param {dataMotion} [options.gravity] - The gravity data to convert.
  * @param {string} [options.outputApi] - The output API format.
- * @param {Object|Array} [options.accelerometer] - The accelerometer data to convert.
- * @param {Object|Array} [options.gyroscope] - The gyroscope data to convert.
- * @param {Object|Array} [options.gravity] - The gravity data to convert.
- * @returns {Object} The converted sensor data. The output is a deep copy of the input
+ *
+ * @returns {Object} The converted data. The output is a deep copy of the input
  * data, even if the input and output APIs are the same.
- * @throws {Error} If the conversion between the specified input and output APIs is unsupported.
  *
- * @see inputApiValid
- * @see outputApiValid
+ * @throws {Error} If the format between the specified input and output APIs is unsupported.
  *
- * @memberof conversion
+ * @see apiValid
+ *
+ * @memberof format
  *
  */
 export function apiConvert({
-  inputApi,
-  outputApi,
+  api,
   accelerometer: accelerometerInput,
   gyroscope: gyroscopeInput,
   gravity: gravityInput,
+  outputApi,
 }) {
 
-  if(inputApi === outputApi) {
-    const returnValue = {};
+  if(api === outputApi) {
+    const returnValue = { api: outputApi };
     if(accelerometerInput) {
       returnValue.accelerometer = structuredClone(accelerometerInput);
     }
@@ -263,10 +297,10 @@ export function apiConvert({
       returnValue.gravity = structuredClone(gravityInput);
     }
     return returnValue;
-  } // inputApi === outputApi
+  } // api === outputApi
 
-  if(inputApi === 'v3' && outputApi === 'riot-v1-array') {
-    const returnValue = {};
+  if(api === 'v3' && outputApi === 'riot-v1-array') {
+    const returnValue = { api: outputApi };
 
     if (accelerometerInput) {
       returnValue.accelerometer = [
@@ -293,10 +327,10 @@ export function apiConvert({
     }
     return returnValue;
 
-  } // inputApi === 'v3' && outputApi === 'riot-v1-array'
+  } // api === 'v3' && outputApi === 'riot-v1-array'
 
-  if(inputApi === 'riot-v1-array' && outputApi === 'v3') {
-    const returnValue = {};
+  if(api === 'riot-v1-array' && outputApi === 'v3') {
+    const returnValue = { api: outputApi };
 
     if(accelerometerInput) {
       returnValue.accelerometer = {
@@ -320,11 +354,11 @@ export function apiConvert({
       };
     }
     return returnValue;
-  } // inputApi === 'riot-v1-array' && outputApi === 'v3'
+  } // api === 'riot-v1-array' && outputApi === 'v3'
 
 
-  if(inputApi === 'riot-v2-array' && outputApi === 'riot-v1-array') {
-    const returnValue = {};
+  if(api === 'riot-v2-array' && outputApi === 'riot-v1-array') {
+    const returnValue = { api: outputApi };
 
     if (accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
@@ -342,10 +376,10 @@ export function apiConvert({
     }
     return returnValue;
 
-  } // inputApi === 'riot-v2-array' && outputApi === 'riot-v1-array'
+  } // api === 'riot-v2-array' && outputApi === 'riot-v1-array'
 
-  if(inputApi === 'riot-v1-array' && outputApi === 'riot-v2-array') {
-    const returnValue = {};
+  if(api === 'riot-v1-array' && outputApi === 'riot-v2-array') {
+    const returnValue = { api: outputApi };
 
     if(accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
@@ -361,8 +395,8 @@ export function apiConvert({
       returnValue.gravity = [...gravityInput];
     }
     return returnValue;
-  } // inputApi === 'riot-v1-array' && outputApi === 'riot-v2-array'
+  } // api === 'riot-v1-array' && outputApi === 'riot-v2-array'
 
-  throw new Error(`Unsupported conversion: ${inputApi} to ${outputApi}`);
+  throw new Error(`Unsupported format: ${api} to ${outputApi}`);
 }
 
