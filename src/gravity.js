@@ -128,11 +128,11 @@ export class Gravity {
    * accelerometer, gyroscope and gravity conform to the `api` version.
    *
    * @param {Object} [params={}] - The input parameters.
-   * @param {dataXyz|dataArray} params.accelerometer - The accelerometer data, conforming to the API version.
-   * @param {dataXyz|dataArray} params.gyroscope - The gyroscope data, conforming to the API version.
+   * @param {dataMotion} params.accelerometer - The accelerometer data, conforming to the API version.
+   * @param {dataMotion} params.gyroscope - The gyroscope data, conforming to the API version.
    * @param {number} [params.sampleTime] - The timestamp of the current sample in seconds.
    *
-   * @returns {dataXyz|dataArray} An object containing the estimated gravity vector. The gravity vector
+   * @returns {dataMotion} An object containing the estimated gravity vector. The gravity vector
    * is normalised and conforms to the output API version specified in the constructor.
    *
    * @throws {Error} Throws an error if API version is missing.

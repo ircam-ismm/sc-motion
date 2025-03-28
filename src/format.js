@@ -73,7 +73,7 @@
  */
 
 /**
- * Data sensor according to multiple version of the API.
+ * Data sensor according to API version.
  *
  * @typedef {dataXyz|dataAlphaBetaGamma|dataArray} dataMotion
  * @memberof format

@@ -122,7 +122,7 @@ Type: [Array][27]<[number][26]>
 
 ### dataMotion
 
-Data sensor according to multiple version of the API.
+Data sensor according to API version.
 
 Type: (dataXyz | dataAlphaBetaGamma | dataArray)
 
@@ -361,8 +361,8 @@ accelerometer, gyroscope and gravity conform to the `api` version.
 
 *   `params` **[Object][25]** The input parameters. (optional, default `{}`)
 
-    *   `params.accelerometer` **(dataXyz | dataArray)** The accelerometer data, conforming to the API version.
-    *   `params.gyroscope` **(dataXyz | dataArray)** The gyroscope data, conforming to the API version.
+    *   `params.accelerometer` **dataMotion** The accelerometer data, conforming to the API version.
+    *   `params.gyroscope` **dataMotion** The gyroscope data, conforming to the API version.
     *   `params.sampleTime` **[number][26]?** The timestamp of the current sample in seconds.
     *   `params.api` &#x20;
 
@@ -374,7 +374,7 @@ accelerometer, gyroscope and gravity conform to the `api` version.
 *   Throws **[Error][30]** Throws an error if both sample interval and sample rate are missing (sample rate
     comes from the constructor or the set method).
 
-Returns **(dataXyz | dataArray)** An object containing the estimated gravity vector. The gravity vector
+Returns **dataMotion** An object containing the estimated gravity vector. The gravity vector
 is normalised and conforms to the output API version specified in the constructor.
 
 [1]: #format
