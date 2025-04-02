@@ -102,24 +102,33 @@ export class Gravity {
    */
   set(attributes) {
     const { sampleRate } = attributes;
-    if (Number.isNaN(sampleRate)
-      || (typeof sampleRate !== 'undefined' && sampleRate <= 0) ) {
+    if (typeof sampleRate !== 'undefined'
+      && (Number.isNaN(sampleRate)
+        || (typeof sampleRate !== 'undefined' && sampleRate <= 0))
+      ) {
       throw new Error(`Gravity: Invalid sample rate: ${sampleRate}`);
     }
 
     const { outputApi } = attributes;
-    if (!apiValidate(outputApi)) {
+    if (typeof outputApi !== 'undefined'
+      && !apiValidate(outputApi)) {
       throw new Error(`Gravity: Invalid output API version: ${outputApi}`);
     }
 
     const { gyroscopeWeightLinear } = attributes;
-    if (Number.isNaN(gyroscopeWeightLinear)
-      || gyroscopeWeightLinear < 0
-      || gyroscopeWeightLinear > 1) {
+    if (typeof gyroscopeWeightLinear !== 'undefined'
+      && (Number.isNaN(gyroscopeWeightLinear)
+        || gyroscopeWeightLinear < 0
+        || gyroscopeWeightLinear > 1)
+    ) {
       throw new Error(`Gravity: Invalid gyroscope weight: ${gyroscopeWeightLinear}`);
     }
 
     Object.assign(this, attributes);
+
+    if(this.outputApi === undefined) {
+      throw new Error(`Gravity: Undefined output API version`);
+    }
   }
 
   /**

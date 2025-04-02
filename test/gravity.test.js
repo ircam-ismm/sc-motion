@@ -145,6 +145,7 @@ suite('data integrity', () => {
 
     test('size', () => {
       assert.strictEqual(tracks.orientation.buffers[0].size,
+        // no orientation on first sample
         tracks.accelerometer.buffers[0].size - 1);
     });
   });
@@ -230,6 +231,67 @@ suite('gravity', () => {
     });
 
   }); // 'constructor with bad parameters'
+
+  test('set with good parameters', () => {
+    const gravityProcessor = new Gravity({ outputApi: 'v3' });
+
+    fc.assert(fc.property(
+      fc.oneof(fc.constant(undefined), fc.constantFrom(...apiValid)),
+      fc.oneof(fc.constant(undefined), fc.float({ min: 0, max: 1., noNaN: true })),
+      fc.oneof(fc.constant(undefined), fc.float({ min: 0, minExcluded: true, noNaN: true, noDefaultInfinity:true })),
+      (outputApi, gyroscopeWeightLinear, sampleRate) => {
+        const options = { outputApi, gyroscopeWeightLinear, sampleRate };
+        // remove undefined options
+        Object.keys(options).forEach((key) => {
+          if (options[key] === undefined) {
+            delete options[key];
+          }
+        });
+        assert.doesNotThrow(() => {
+          gravityProcessor.set(options);
+          if(outputApi !== undefined) {
+            assert.equal(gravityProcessor.outputApi, outputApi);
+          }
+          if(gyroscopeWeightLinear !== undefined) {
+            assert.equal(gravityProcessor.gyroscopeWeightLinear, gyroscopeWeightLinear);
+          }
+          if(sampleRate !== undefined) {
+            assert.equal(gravityProcessor.sampleRate, sampleRate);
+          }
+        });
+      }),
+    );
+
+  });
+
+  test('set with bad parameters', () => {
+    const gravityProcessor = new Gravity({ outputApi: 'v3' });
+
+    fc.assert(fc.property(
+      fc.oneof(fc.constant(undefined), fc.string().filter(s => !apiValid.includes(s))),
+      fc.oneof(fc.constant(undefined), fc.float().filter(f => Number.isNaN(f) || f < 0 || f > 1)),
+      fc.oneof(fc.constant(undefined), fc.float().filter(f => Number.isNaN(f) || f < 0)),
+      (outputApi, gyroscopeWeightLinear, sampleRate) => {
+        const options = { outputApi, gyroscopeWeightLinear, sampleRate };
+        // remove undefined options
+        Object.keys(options).forEach((key) => {
+          if (options[key] === undefined) {
+            delete options[key];
+          }
+        });
+        if (Object.keys(options).length === 0) {
+          return;
+        }
+
+        assert.throws(() => {
+          gravityProcessor.set(options);
+        });
+      }),
+    );
+
+  });
+
+
 
   test('compare with pipo', () => {
     const { api, gyroscopeWeightLinear, sampleRate } = data.parameters;
