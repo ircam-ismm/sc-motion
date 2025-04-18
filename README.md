@@ -18,8 +18,8 @@ Please see [FORMAT.md](./FORMAT.md) for OSC and WebSocket messages format.
 
 In particular, we support the [R-IoT](https://github.com/ircam-ismm/riot-v3) hardware device and the [CoMote](https://apps.ismm.ircam.fr/comote) phone app.
 
-| :warning:  Please note that the OSC messages format changed between version 2 and version 3. The old format for CoMote v2 is documented [here](./FORMAT-comote-v2.md). |
----------------------
+> [!WARNING]
+> Please note that the OSC messages format changed between version 2 and version 3. The old format for CoMote v2 is documented [here](./FORMAT-comote-v2.md).
 
 ## API
 
