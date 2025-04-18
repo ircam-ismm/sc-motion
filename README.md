@@ -10,6 +10,14 @@ npm install --save @ircam/sc-motion
 
 ```
 
+## Format
+
+Our goal is to provide unified axis and units across the different platforms. For this reason, we choose to follow the W3C specifications.
+
+Please see [FORMAT.md](./FORMAT.md) for OSC and WebSocket messages format.
+
+In particular, we support the [R-IoT](https://github.com/ircam-ismm/riot-v3) hardware device and the [CoMote](https://apps.ismm.ircam.fr/comote) phone app.
+
 ## API
 
 <!-- TODO: display the documentation of the Gravity constructor -->
