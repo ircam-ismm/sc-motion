@@ -218,11 +218,40 @@ suite('conversion', () => {
           },
         },
       ],
+      [
+        {
+          accelerometer: { x: 1, y: 2, z: 3 },
+          gyroscope: undefined,
+        },
+        {
+          accelerationIncludingGravity: { x: 1, y: 2, z: 3 },
+          rotationRate: undefined,
+        },
+      ],
+      [
+        {
+          accelerometer: undefined,
+          gyroscope: {
+            x: 4,
+            y: 5,
+            z: 6,
+          },
+        },
+        {
+          accelerationIncludingGravity: undefined,
+          rotationRate: {
+            alpha: radianToDegree(6),
+            beta: radianToDegree(4),
+            gamma: radianToDegree(5),
+          },
+        },
+      ],
+
     ];
 
     // replace with replay options, like
     // { seed: 824551551, path: "0", endOnFailure: true }
-    const debugOptions = {};
+    const debugOptions = { seed: -615023004, path: "2", endOnFailure: true };
     let run = 0;
     fc.assert(
       fc.property(
@@ -266,43 +295,55 @@ suite('conversion', () => {
                 devicemotionExpected.accelerationIncludingGravity[key]));
             });
 
-            ['alpha', 'beta', 'gamma'].forEach(key => {
-              assert(almostEqual(devicemotion.rotationRate[key],
-                devicemotionExpected.rotationRate[key]));
-            });
+            if (devicemotionExpected.rotationRate) {
+              ['alpha', 'beta', 'gamma'].forEach(key => {
+                assert(almostEqual(devicemotion.rotationRate[key],
+                  devicemotionExpected.rotationRate[key]));
+              });
+            } else {
+              assert.equal(devicemotionExpected.rotationRate, devicemotion.rotationRate);
+            }
 
           }
 
           const sensorsReverted = devicemotionToAccelerometerGyroscope(devicemotion);
-          ['x', 'y', 'z'].forEach(key => {
+          if (sensors.accelerometer) {
+            ['x', 'y', 'z'].forEach(key => {
+              // definition
+              assert(almostEqual(sensors.accelerometer[key],
+                devicemotion.accelerationIncludingGravity[key]));
+
+              // forward and backward
+              assert(almostEqual(sensorsReverted.accelerometer[key],
+                sensors.accelerometer[key]));
+            });
+          } else {
+            assert.equal(sensorsReverted.accelerometer, sensors.accelerometer);
+          }
+
+          if (sensors.gyroscope) {
             // definition
-            assert(almostEqual(sensors.accelerometer[key],
-              devicemotion.accelerationIncludingGravity[key]));
+            assert(almostEqual(
+              radianToDegree(sensors.gyroscope.z),
+              devicemotion.rotationRate.alpha,
+            ));
+            assert(almostEqual(
+              radianToDegree(sensors.gyroscope.x),
+              devicemotion.rotationRate.beta,
+            ));
+            assert(almostEqual(
+              radianToDegree(sensors.gyroscope.y),
+              devicemotion.rotationRate.gamma,
+            ));
 
             // forward and backward
-            assert(almostEqual(sensorsReverted.accelerometer[key],
-              sensors.accelerometer[key]));
-          });
-
-          // definition
-          assert(almostEqual(
-            radianToDegree(sensors.gyroscope.z),
-            devicemotion.rotationRate.alpha,
-          ));
-          assert(almostEqual(
-            radianToDegree(sensors.gyroscope.x),
-            devicemotion.rotationRate.beta,
-          ));
-          assert(almostEqual(
-            radianToDegree(sensors.gyroscope.y),
-            devicemotion.rotationRate.gamma,
-          ));
-
-          // forward and backward
-          ['alpha', 'beta', 'gamma'].forEach(key => {
-            assert(almostEqual(sensorsReverted.gyroscope[key],
-              sensors.gyroscope[key]));
-          });
+            ['alpha', 'beta', 'gamma'].forEach(key => {
+              assert(almostEqual(sensorsReverted.gyroscope[key],
+                sensors.gyroscope[key]));
+            });
+          } else {
+            assert.equal(sensorsReverted.gyroscope, sensors.gyroscope);
+          }
 
           ++run;
         }), {

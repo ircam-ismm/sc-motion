@@ -249,21 +249,26 @@ export function accelerometerGyroscopeToDevicemotion({ accelerometer, gyroscope 
 
 export function devicemotionToAccelerometerGyroscope({ accelerationIncludingGravity, rotationRate }) {
 
-  const accelerometer = {...accelerationIncludingGravity}; // copy
-  const gyroscope = (rotationRate
-    ? {
-      x: degreeToRadian(rotationRate.beta),
-      y: degreeToRadian(rotationRate.gamma),
-      z: degreeToRadian(rotationRate.alpha),
-    }
-    : undefined
-  );
+  const sensors = {};
 
-  return { accelerometer, gyroscope };
+  if (accelerationIncludingGravity) {
+    Object.assign(sensors, {
+      accelerometer: {...accelerationIncludingGravity}, // copy
+    });
+  }
+
+  if (rotationRate) {
+    Object.assign(sensors, {
+      gyroscope: {
+        x: degreeToRadian(rotationRate.beta),
+        y: degreeToRadian(rotationRate.gamma),
+        z: degreeToRadian(rotationRate.alpha),
+      },
+    });
+  }
+
+  return sensors;
 }
-
-
-
 
 /**
  * A list of valid API versions supported by the system.
