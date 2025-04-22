@@ -229,13 +229,19 @@ export function accelerometerGyroscopeToDevicemotion({ accelerometer, gyroscope 
   const devicemotion = {};
 
   if (accelerometer) {
+    // copy, including extra
+    const { x, y, z, ...extra } = accelerometer;
+
     Object.assign(devicemotion, {
-      accelerationIncludingGravity: {...accelerometer}, // copy
+      ...extra,
+      accelerationIncludingGravity: { x, y, z }, // copy
     });
   }
 
   if (gyroscope) {
+    const { x, y, z, ...extra } = gyroscope;
     Object.assign(devicemotion, {
+      ...extra,
       rotationRate: {
         alpha: radianToDegree(gyroscope.z),
         beta: radianToDegree(gyroscope.x),
@@ -247,13 +253,20 @@ export function accelerometerGyroscopeToDevicemotion({ accelerometer, gyroscope 
   return devicemotion;
 }
 
-export function devicemotionToAccelerometerGyroscope({ accelerationIncludingGravity, rotationRate }) {
+export function devicemotionToAccelerometerGyroscope({
+  accelerationIncludingGravity,
+  rotationRate,
+  ...extra
+}) {
 
-  const sensors = {};
+  const sensors = { ...extra};
 
   if (accelerationIncludingGravity) {
+    // copy
+    const { x, y, z } = accelerationIncludingGravity;
+
     Object.assign(sensors, {
-      accelerometer: {...accelerationIncludingGravity}, // copy
+      accelerometer: { x, y, z }, // copy
     });
   }
 
