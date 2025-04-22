@@ -224,6 +224,47 @@ export function arrayToAlphaBetaGamma([alpha, beta, gamma]) {
   return { alpha, beta, gamma };
 }
 
+export function accelerometerGyroscopeToDevicemotion({ accelerometer, gyroscope }) {
+
+  const devicemotion = {};
+
+  if (accelerometer) {
+    Object.assign(devicemotion, {
+      accelerationIncludingGravity: {...accelerometer}, // copy
+    });
+  }
+
+  if (gyroscope) {
+    Object.assign(devicemotion, {
+      rotationRate: {
+        alpha: radianToDegree(gyroscope.z),
+        beta: radianToDegree(gyroscope.x),
+        gamma: radianToDegree(gyroscope.y),
+      },
+    });
+  }
+
+  return devicemotion;
+}
+
+export function devicemotionToAccelerometerGyroscope({ accelerationIncludingGravity, rotationRate }) {
+
+  const accelerometer = {...accelerationIncludingGravity}; // copy
+  const gyroscope = (rotationRate
+    ? {
+      x: degreeToRadian(rotationRate.beta),
+      y: degreeToRadian(rotationRate.gamma),
+      z: degreeToRadian(rotationRate.alpha),
+    }
+    : undefined
+  );
+
+  return { accelerometer, gyroscope };
+}
+
+
+
+
 /**
  * A list of valid API versions supported by the system.
  *

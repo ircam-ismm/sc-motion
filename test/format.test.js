@@ -18,6 +18,9 @@ import {
   alphaBetaGammaToArray,
   arrayToAlphaBetaGamma,
 
+  accelerometerGyroscopeToDevicemotion,
+  devicemotionToAccelerometerGyroscope,
+
   apiConvert,
   apiValid,
   apiValidate,
@@ -111,8 +114,8 @@ suite('conversion', () => {
     let run = 0;
     fc.assert(
       fc.property(
-        fc.array(fc.float( {noNaN: true, noDefaultInfinity: true }), { minLength: 3, maxLength: 3 }),
-        fc.array(fc.float( {noNaN: true, noDefaultInfinity: true }), { minLength: 3, maxLength: 3 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 3, maxLength: 3 }),
+        fc.array(fc.float({ noNaN: true, noDefaultInfinity: true }), { minLength: 3, maxLength: 3 }),
         (input, outputExpected) => {
           const inputCopy = [...input];
           // normalised
@@ -122,7 +125,7 @@ suite('conversion', () => {
             && run < examples.length) {
             assert(almostEqualArray(inputCopy, outputExpected));
           }
-          if(norm === 0) {
+          if (norm === 0) {
             assert.deepStrictEqual(inputCopy, [0, 0, 0]);
           } else {
             const normalisedNorm = arrayNormaliseInPlace([...inputCopy]);
@@ -163,7 +166,6 @@ suite('conversion', () => {
 
   }); // xyzToArray
 
-
   test('alphaBetaGammaToArray', () => {
 
     // replace with replay options, like
@@ -183,6 +185,132 @@ suite('conversion', () => {
     });
 
   }); // alphaBetaGammaToArray
+
+
+  test('devicemotion', () => {
+
+    const examples = [
+      [
+        {
+          accelerometer: { x: 0, y: 0, z: 0 },
+          gyroscope: { x: 0, y: 0, z: 0 },
+        },
+        {
+          accelerationIncludingGravity: { x: 0, y: 0, z: 0 },
+          rotationRate: { alpha: 0, beta: 0, gamma: 0 },
+        },
+      ],
+      [
+        {
+          accelerometer: { x: 1, y: 2, z: 3 },
+          gyroscope: {
+            x: 4,
+            y: 5,
+            z: 6,
+          },
+        },
+        {
+          accelerationIncludingGravity: { x: 1, y: 2, z: 3 },
+          rotationRate: {
+            alpha: radianToDegree(6),
+            beta: radianToDegree(4),
+            gamma: radianToDegree(5),
+          },
+        },
+      ],
+    ];
+
+    // replace with replay options, like
+    // { seed: 824551551, path: "0", endOnFailure: true }
+    const debugOptions = {};
+    let run = 0;
+    fc.assert(
+      fc.property(
+        fc.record({
+          accelerometer: fc.record({
+            x: fc.float({ noNaN: true }),
+            y: fc.float({ noNaN: true }),
+            z: fc.float({ noNaN: true }),
+          }),
+          gyroscope: fc.record({
+            x: fc.float({ noNaN: true }),
+            y: fc.float({ noNaN: true }),
+            z: fc.float({ noNaN: true }),
+          }),
+        }),
+        fc.record({
+          accelerationIncludingGravity: fc.record({
+            x: fc.float({ noNaN: true }),
+            y: fc.float({ noNaN: true }),
+            z: fc.float({ noNaN: true }),
+          }),
+          rotationRate: fc.record({
+            alpha: fc.float({ noNaN: true }),
+            beta: fc.float({ noNaN: true }),
+            gamma: fc.float({ noNaN: true }),
+          }),
+        }),
+        (sensors, devicemotionExpected) => {
+
+          const { accelerometer, gyroscope } = sensors;
+          const devicemotion = accelerometerGyroscopeToDevicemotion({
+            accelerometer,
+            gyroscope,
+          });
+
+          if (!debugOptions.seed
+            && run < examples.length) {
+
+            ['x', 'y', 'z'].forEach(key => {
+              assert(almostEqual(devicemotion.accelerationIncludingGravity[key],
+                devicemotionExpected.accelerationIncludingGravity[key]));
+            });
+
+            ['alpha', 'beta', 'gamma'].forEach(key => {
+              assert(almostEqual(devicemotion.rotationRate[key],
+                devicemotionExpected.rotationRate[key]));
+            });
+
+          }
+
+          const sensorsReverted = devicemotionToAccelerometerGyroscope(devicemotion);
+          ['x', 'y', 'z'].forEach(key => {
+            // definition
+            assert(almostEqual(sensors.accelerometer[key],
+              devicemotion.accelerationIncludingGravity[key]));
+
+            // forward and backward
+            assert(almostEqual(sensorsReverted.accelerometer[key],
+              sensors.accelerometer[key]));
+          });
+
+          // definition
+          assert(almostEqual(
+            radianToDegree(sensors.gyroscope.z),
+            devicemotion.rotationRate.alpha,
+          ));
+          assert(almostEqual(
+            radianToDegree(sensors.gyroscope.x),
+            devicemotion.rotationRate.beta,
+          ));
+          assert(almostEqual(
+            radianToDegree(sensors.gyroscope.y),
+            devicemotion.rotationRate.gamma,
+          ));
+
+          // forward and backward
+          ['alpha', 'beta', 'gamma'].forEach(key => {
+            assert(almostEqual(sensorsReverted.gyroscope[key],
+              sensors.gyroscope[key]));
+          });
+
+          ++run;
+        }), {
+      examples,
+      ...debugOptions,
+    });
+
+  }); // devicemotion
 
   suite('apiConvert', () => {
 
@@ -221,7 +349,7 @@ suite('conversion', () => {
                   ...input,
                   outputApi,
                 }),
-                `${JSON.stringify({ ...input , outputApi })}`,
+                `${JSON.stringify({ ...input, outputApi })}`,
               );
             });
           }), {
@@ -244,15 +372,15 @@ suite('conversion', () => {
           fc.record({
             api: fc.constant(api),
             accelerometer: (api === 'v3'
-              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float() })
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
             gyroscope: (api === 'v3'
-              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float() })
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
             gravity: (api === 'v3'
-              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float()})
+              ? fc.record({ x: fc.float(), y: fc.float(), z: fc.float() })
               : fc.array(fc.float(), { minLength: 3, maxLength: 3 })
             ),
           }),
@@ -337,7 +465,7 @@ suite('conversion', () => {
             api,
             accelerometer: { x: 1, y: 2, z: 3 },
             gyroscope: { x: 4, y: 5, z: 6 },
-            gravity: { x: 7, y: 8, z: 9},
+            gravity: { x: 7, y: 8, z: 9 },
           },
           {
             // output
