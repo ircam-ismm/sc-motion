@@ -251,8 +251,8 @@ suite('conversion', () => {
 
     // replace with replay options, like
     // { seed: 824551551, path: "0", endOnFailure: true }
-    const debugOptions = { seed: -615023004, path: "2", endOnFailure: true };
     let run = 0;
+    const debugOptions = {};
     fc.assert(
       fc.property(
         fc.record({
@@ -290,10 +290,15 @@ suite('conversion', () => {
           if (!debugOptions.seed
             && run < examples.length) {
 
-            ['x', 'y', 'z'].forEach(key => {
-              assert(almostEqual(devicemotion.accelerationIncludingGravity[key],
-                devicemotionExpected.accelerationIncludingGravity[key]));
-            });
+            if (devicemotionExpected.accelerationIncludingGravity) {
+              ['x', 'y', 'z'].forEach(key => {
+                assert(almostEqual(devicemotion.accelerationIncludingGravity[key],
+                  devicemotionExpected.accelerationIncludingGravity[key]));
+              });
+            } else {
+              assert.equal(devicemotionExpected.accelerationIncludingGravity,
+                devicemotion.accelerationIncludingGravity);
+            }
 
             if (devicemotionExpected.rotationRate) {
               ['alpha', 'beta', 'gamma'].forEach(key => {
@@ -354,6 +359,37 @@ suite('conversion', () => {
   }); // devicemotion
 
   suite('apiConvert', () => {
+
+    test('bad api pairs', () => {
+      const examples = [
+        ['v0', 'v3'],
+        ['v3', 'v0'],
+        ['riot-v1-array', 'v3'],
+        ['v0', 'v0'],
+      ];
+
+      // replace with replay options, like
+      // { seed: 824551551, path: "0", endOnFailure: true }
+      const debugOptions = {};
+      fc.assert(
+        fc.property(
+          fc.string().filter(api => !apiValid.includes(api)),
+          fc.string().filter(api => !apiValid.includes(api)),
+          (api, outputApi) => {
+
+            if (api !== outputApi) {
+              assert.throws(() => {
+                apiConvert({
+                  api,
+                  outputApi,
+                });
+              });
+            }
+          }), {
+        ...debugOptions,
+      });
+
+    });
 
     test('no change when api === outputApi', () => {
 
