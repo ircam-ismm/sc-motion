@@ -168,7 +168,7 @@ export class Gravity {
       throw new Error('Gravity: Missing gyroscope data');
     }
 
-    if (typeof sampleTime === undefined && !this.sampleRate) {
+    if (typeof sampleTime === 'undefined' && !this.sampleRate) {
       throw new Error('Gravity: Missing sample time and sample rate');
     }
 

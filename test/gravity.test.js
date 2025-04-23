@@ -291,7 +291,29 @@ suite('gravity', () => {
 
   });
 
+  test('process with bad parameters', () => {
+    const { accelerometer, gyroscope } = data.input[0];
 
+      const gravityProcessor = new Gravity({
+          outputApi: 'v3',
+          // no sampleRate
+      });
+
+      const goodParameters = {
+          api: 'v3',
+          accelerometer: { x: 1, y: 2, z: 3 },
+          gyroscope: { x: 4, y: 5, z: 6 },
+          sampleTime: 7,
+      };
+
+      Object.keys(goodParameters).forEach( (p) => {
+          const badParameters = structuredClone(goodParameters);
+          delete badParameters[p];
+          assert.throws(() => {
+              gravityProcessor.process(badParameters);
+          });
+      });
+  });
 
   test('compare with pipo', () => {
     const { api, gyroscopeWeightLinear, sampleRate } = data.parameters;
@@ -319,7 +341,7 @@ suite('gravity', () => {
           accelerometer,
           gyroscope,
         });
-        assert(almostEqualArray(gravity, gravityExpected, tolerance),
+        assert(almostEqualArray(gravity, gravityExpected, {toleranceAbsolute: tolerance}),
           `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
         run++;
       }), {
