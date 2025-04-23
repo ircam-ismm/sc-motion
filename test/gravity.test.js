@@ -341,7 +341,7 @@ suite('gravity', () => {
           accelerometer,
           gyroscope,
         });
-        assert(almostEqualArray(gravity, gravityExpected, {toleranceAbsolute: tolerance}),
+        assert(almostEqualArray(gravity, gravityExpected, tolerance),
           `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
         run++;
       }), {
