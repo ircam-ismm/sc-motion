@@ -33,7 +33,7 @@
   "scripts": {
     "api": "jsdoc-to-readme --src src/*.js --heading-depth 3",
     "preversion": "npm run api && git commit -am 'chore: doc: rebuild'  --allow-empty",
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test --experimental-test-coverage 'test/**/*.test.js'",
     "test:watch": "node --watch --test 'test/**/*.test.js'"
   },
   "license": "BSD-3-Clause",
