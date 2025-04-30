@@ -137,7 +137,13 @@ Notes:
 - All values are float32 `f`, int32 `i` or string `s`. Complex values must be serialised to a string.
 - `timestamp` is a monotonic time in milliseconds that should start at 0 with the application to fit in float32 or int32, or it should be a float64.
 - Any boolean value is converted to an integer: 1 for true and 0 for false
-- Infinity is the max value of float32 or int32.
+- Infinity values are in the valid range of float32 or int32:
+
+| type    | -Infinity      | +Infinity     |
+| ---     | ---            | ---           |
+| int32   | -2147483649    | 2147483647    |
+| float32 | -3.4028235e+38 | 3.4028235e+38 |  
+
 
 ```text
 /<source>/<api>/<id>/accelerometer  [x, y, z, timestamp, frequency]
