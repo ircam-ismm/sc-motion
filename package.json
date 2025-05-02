@@ -27,8 +27,7 @@
     "./*.js": "./src/*.js"
   },
   "imports": {
-    "#data/*.json": "./test/data/*.json",
-    "#helpers/*.js": "./test/helpers/*.js"
+    "#data/*.json": "./test/data/*.json"
   },
   "scripts": {
     "api": "jsdoc-to-readme --src src/*.js --heading-depth 3",
@@ -39,6 +38,7 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "@ircam/eslint-config": "^2.0.1",
+    "@ircam/sc-utils": "^1.11.0",
     "eslint": "^9.21.0",
     "fast-check": "^4.0.0",
     "jsdoc-to-readme": "^2.0.2"

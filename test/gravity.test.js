@@ -6,7 +6,7 @@ import assert  from 'node:assert';
 import { suite, test, before,  } from 'node:test';
 import fc  from 'fast-check';
 
-import { almostEqualArray } from '#helpers/comparison.js';
+import { almostEqualArray } from '@ircam/sc-utils';
 
 import { Gravity } from '@ircam/sc-motion/gravity.js';
 import {
