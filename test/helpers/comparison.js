@@ -24,7 +24,7 @@ export function almostEqual(value, reference, tolerance = Number.EPSILON) {
   }
 
   const toleranceRelative = tolerance
-    * Math.max(Math.abs(value), Math.abs(reference));
+    * Math.min(Math.abs(value), Math.abs(reference));
 
   if (difference <= toleranceRelative) {
     return true;

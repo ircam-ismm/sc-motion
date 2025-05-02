@@ -24,7 +24,11 @@ suite('comparison', () => {
         fc.double({ min: 0, noDefaultInfinity: true, noNaN: true}),
         (value, tolerance) => {
 
-          // tolerance should sum all possible computation errors
+          assert(almostEqual(value, value, tolerance),
+            `Same value must be equal for any tolerance: value: ${value}, tolerance: ${tolerance}`
+          );
+
+          // tolerance must sum all possible computation errors
           const range = Math.max(Math.abs(value), Math.abs(tolerance));
 
           assert(almostEqual(value, value + sign(value) * tolerance, 2 * tolerance),
@@ -35,9 +39,17 @@ suite('comparison', () => {
             `Relative tolerance too strict: value: ${value}, tolerance: ${tolerance}, range: ${range}`
           );
 
-          assert(almostEqual(value, (value + sign(value) * range) * range, 3 * range),
-            `Tolerance too strict: value: ${value}, tolerance: ${tolerance}, range: ${range}`
+          const differentValue = sign(value) * Math.max(
+            Math.abs(value + sign(value) * range),
+            Math.abs(value * range),
           );
+          if (value !== differentValue
+            && Math.abs(differentValue) !== Infinity
+          ) {
+            assert(!almostEqual(value, differentValue, 0.5 * range),
+              `Tolerance too relaxed: value: ${value}, tolerance: ${tolerance}, range: ${range}`
+              );
+            }
 
         }), {
           ...debugOptions,
