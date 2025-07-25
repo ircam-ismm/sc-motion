@@ -24,6 +24,16 @@ e = {
       gamma, // deg/s
     },
   },
+
+  // not standardised, yet. 
+  // See https://w3c.github.io/deviceorientation/spec-source-orientation.html#worked-example
+  heading: {
+    interval, // ms
+    accuracy, // degrees, -1 for unknown
+    magnetic, // degrees (0 is magnetic north, 90 is east)
+    geographic, // degrees (0 is geographic north, 90 is east)
+  },
+
   buttonA, // 0 or 1
   buttonB, // 0 or 1 
 }
@@ -39,6 +49,7 @@ Notes:
 
 ```
 /comote/${id}/devicemotion  [interval, x, y, z, alpha, beta, gamma]
+/comote/${id}/heading       [interval, accuracy, magnetic, geographic]
 /comote/${id}/buttonA       [buttonA]
 /comote/${id}/buttonB       [buttonA]
 ```
