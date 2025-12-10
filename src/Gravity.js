@@ -13,10 +13,8 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *
  * @see https://w3c.github.io/accelerometer/#gravitysensor-interface
  *
- *
  * @example
- *
- * import { Gravity } from '@ircam/sc-motion/gravity.js';
+ * import { Gravity } from '@ircam/sc-motion';
  *
  * const gravityProcessor = new Gravity({ outputApi: 'v3'});
  *
@@ -29,12 +27,9 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *   gyroscope: { x: 0, y: 0, z: 0 },
  *   sampleTime: 0,
  * };
- * ({ gravity } = gravityProcessor.process(motionSensor) );
+ * gravity = gravityProcessor.process(motionSensor);
  * console.log(gravity);
- * // {
- * //   api: 'v3',
- * //   gravity: { x: 9.80665, y: 0, z: 0 },
- * // }
+ * // { x: 9.80665, y: 0, z: 0 }
  *
  * motionSensor = {
  *   api: 'v3',
@@ -42,7 +37,7 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *   gyroscope: { x: -0.001, y: -0.001, z: 0 },
  *   sampleTime: 0.01,
  * };
- * const gravity = gravityProcessor.process(motionSensor);
+ * gravity = gravityProcessor.process(motionSensor);
  * console.log(gravity);
  * // { x: 6.934348715723057, y: 6.934348715723057, z: 0 }
  */
