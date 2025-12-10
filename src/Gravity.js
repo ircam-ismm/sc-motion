@@ -89,7 +89,7 @@ export class Gravity {
 
   set outputApi(outputApi) {
     if (!apiValidate(outputApi)) {
-      throw new Error(`Gravity: Invalid output API version: ${outputApi}`);
+      throw new Error(`Cannot set outputApi on Gravity: Invalid output API version: ${outputApi}`);
     }
 
     this.#outputApi = outputApi;
@@ -104,7 +104,7 @@ export class Gravity {
       if (Number.isNaN(sampleRate)
         || (typeof sampleRate !== 'undefined' && sampleRate <= 0)
       ) {
-        throw new Error(`Gravity: Invalid sample rate: ${sampleRate}`);
+        throw new Error(`Cannot set sampleRate on Gravity: Invalid sample rate: ${sampleRate}`);
       }
     }
 
@@ -120,7 +120,7 @@ export class Gravity {
         || gyroscopeWeightLinear < 0
         || gyroscopeWeightLinear > 1
     ) {
-      throw new Error(`Gravity: Invalid gyroscope weight: ${gyroscopeWeightLinear}`);
+      throw new Error(`Cannot set gyroscopeWeightLinear on Gravity: Invalid gyroscope weight: ${gyroscopeWeightLinear}`);
     }
 
     this.#gyroscopeWeightLinear = gyroscopeWeightLinear;
@@ -189,15 +189,15 @@ export class Gravity {
     timestamp,
   } = {}) {
     if (!api) {
-      throw new Error('Gravity: Missing API version');
+      throw new Error('Cannot execute process on Gravity: Missing API version');
     }
 
     if (!accelerometer) {
-      throw new Error('Gravity: Missing accelerometer data');
+      throw new Error('Cannot execute process on Gravity: Missing accelerometer data');
     }
 
     if (!gyroscope) {
-      throw new Error('Gravity: Missing gyroscope data');
+      throw new Error('Cannot execute process on Gravity: Missing gyroscope data');
     }
 
     if (typeof timestamp === 'undefined') {
@@ -205,7 +205,7 @@ export class Gravity {
     }
 
     if (typeof timestamp === 'undefined' && !this.sampleRate) {
-      throw new Error('Gravity: Missing timestamp and sample rate');
+      throw new Error('Cannot execute process on Gravity: Missing timestamp and sample rate');
     }
 
     // same as PiPoOrientation (riot-v1)
@@ -233,7 +233,7 @@ export class Gravity {
         gravity: this.accelerometerEstimate,
       });
 
-      return { gravity };
+      return gravity;
     }
 
     const deltaTime = (timestamp
@@ -302,7 +302,7 @@ export class Gravity {
       gravity: this.accelerometerEstimate,
     });
 
-    return { gravity };
+    return gravity;
   }
 
 }

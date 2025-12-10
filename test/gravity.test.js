@@ -336,7 +336,7 @@ suite('gravity', () => {
         const { accelerometer, gyroscope } = data.input[run];
         const { gravity: gravityExpected } = data.output[run];
 
-        const { gravity } = gravityProcessor.process({
+        const gravity = gravityProcessor.process({
           api,
           accelerometer,
           gyroscope,
