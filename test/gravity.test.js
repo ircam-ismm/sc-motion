@@ -157,7 +157,7 @@ suite('gravity', () => {
   test('constructor with default parameters', () => {
 
     // outputApi is mandatory
-    assert.throws(() => new Gravity() );
+    assert.doesNotThrow(() => new Gravity() );
 
     const gravity = new Gravity({outputApi: 'v3'});
     assert.ok(gravity);

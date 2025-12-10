@@ -24,6 +24,7 @@
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./gravity.js": "./src/Gravity.js",
     "./*.js": "./src/*.js"
   },
   "imports": {
