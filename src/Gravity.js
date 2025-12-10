@@ -42,16 +42,13 @@ const { abs, atan2, cos, sin, sqrt, pow, tan, max } = Math;
  *   gyroscope: { x: -0.001, y: -0.001, z: 0 },
  *   sampleTime: 0.01,
  * };
- * ({ gravity } = gravityProcessor.process(motionSensor) );
+ * const gravity = gravityProcessor.process(motionSensor);
  * console.log(gravity);
- * // {
- * //   api: 'v3',
- * //   gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 },
- * // }
+ * // { x: 6.934348715723057, y: 6.934348715723057, z: 0 }
  */
 export class Gravity {
   #outputApi;
-  #sampleRate;
+  #frequency;
   #gyroscopeWeightLinear;
 
   /**
@@ -62,22 +59,22 @@ export class Gravity {
    * @param {string} [options.outputApi] - The API version for the input and output data.
    * Current version is 'v3'.
    * @param {number} [options.gyroscopeWeightLinear=0.9] - The linear weight for the gyroscope.
-   * @param {number} [options.sampleRate=undefined] - The sample rate for processing. Used
+   * @param {number} [options.frequency=undefined] - The sample rate for processing. Used
    * if sampleTime is not provided when processing.
    *
-   * @throws {Error} Throws an error if `sampleRate` is not a positive number.
+   * @throws {Error} Throws an error if `frequency` is not a positive number.
    * @throws {Error} Throws an error if `outputApi` is invalid.
    * @throws {Error} Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
    */
   constructor({
     outputApi = 'v3',
     gyroscopeWeightLinear = 0.9,
-    sampleRate = undefined,
+    frequency = undefined,
   } = {}) {
     this.set({
       outputApi,
       gyroscopeWeightLinear,
-      sampleRate,
+      frequency,
     });
 
     this.reset();
@@ -95,20 +92,20 @@ export class Gravity {
     this.#outputApi = outputApi;
   }
 
-  get sampleRate() {
-    return this.#sampleRate;
+  get frequency() {
+    return this.#frequency;
   }
 
-  set sampleRate(sampleRate) {
-    if (typeof sampleRate !== 'undefined') {
-      if (Number.isNaN(sampleRate)
-        || (typeof sampleRate !== 'undefined' && sampleRate <= 0)
+  set frequency(frequency) {
+    if (typeof frequency !== 'undefined') {
+      if (Number.isNaN(frequency)
+        || (typeof frequency !== 'undefined' && frequency <= 0)
       ) {
-        throw new Error(`Cannot set sampleRate on Gravity: Invalid sample rate: ${sampleRate}`);
+        throw new Error(`Cannot set frequency on Gravity: Invalid sample rate: ${frequency}`);
       }
     }
 
-    this.#sampleRate = sampleRate;
+    this.#frequency = frequency;
   }
 
   get gyroscopeWeightLinear() {
@@ -147,12 +144,12 @@ export class Gravity {
    */
   set(attributes) {
     const {
-      sampleRate,
+      frequency,
       outputApi,
       gyroscopeWeightLinear,
     } = attributes;
 
-    this.sampleRate = sampleRate;
+    this.frequency = frequency;
 
     if (typeof outputApi !== 'undefined') {
       this.outputApi = outputApi;
@@ -171,7 +168,7 @@ export class Gravity {
    * @param {Object} [params={}] - The input parameters.
    * @param {dataMotion} params.accelerometer - The accelerometer data, conforming to the API version.
    * @param {dataMotion} params.gyroscope - The gyroscope data, conforming to the API version.
-   * @param {number} [params.sampleTime] - The timestamp of the current sample in seconds.
+   * @param {number} [params.timestamp] - The timestamp of the current sample in seconds.
    *
    * @returns {dataMotion} An object containing the estimated gravity vector. The gravity vector
    * is normalised and conforms to the output API version specified in the constructor.
@@ -204,7 +201,7 @@ export class Gravity {
       timestamp = accelerometer.timestamp || gyroscope.timestamp;
     }
 
-    if (typeof timestamp === 'undefined' && !this.sampleRate) {
+    if (typeof timestamp === 'undefined' && !this.frequency) {
       throw new Error('Cannot execute process on Gravity: Missing timestamp and sample rate');
     }
 
@@ -238,7 +235,7 @@ export class Gravity {
 
     const deltaTime = (timestamp
       ? timestamp - this.sampleTimeLast
-      : 1 / this.sampleRate
+      : 1 / this.frequency
     );
 
     // Integrate angle from gyro current values and last result

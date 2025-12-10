@@ -1,5 +1,5 @@
 {
   "api": "riot-v2-array",
   "gyroscopeWeightLinear": 0.9677,
-  "sampleRate": 100
+  "frequency": 100
 }

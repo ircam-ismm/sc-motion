@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ircam-ismm/sc-motion"
+    "url": "git+https://github.com/ircam-ismm/sc-motion.git"
   },
   "bugs": {
     "url": "https://github.com/ircam-ismm/sc-motion/issues"

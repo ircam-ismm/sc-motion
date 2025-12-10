@@ -356,7 +356,7 @@ export function apiConvert({
     return returnValue;
   } // api === outputApi
 
-  if(api === 'v3' && outputApi === 'riot-v1-array') {
+  if (api === 'v3' && outputApi === 'riot-v1-array') {
     const returnValue = { api: outputApi };
 
     if (accelerometerInput) {
