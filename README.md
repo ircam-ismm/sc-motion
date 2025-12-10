@@ -304,7 +304,7 @@ Gravity class for estimating gravity using accelerometer and gyroscope.
 
 *   `$0` **[Object][25]**  (optional, default `{}`)
 
-    *   `$0.outputApi` &#x20;
+    *   `$0.outputApi`   (optional, default `'v3'`)
     *   `$0.gyroscopeWeightLinear`   (optional, default `0.9`)
     *   `$0.sampleRate`   (optional, default `undefined`)
 *   `options` **[Object][25]** Configuration options for the Gravity instance. (optional, default `{}`)
@@ -378,6 +378,7 @@ accelerometer, gyroscope and gravity conform to the `api` version.
     *   `params.gyroscope` **dataMotion** The gyroscope data, conforming to the API version.
     *   `params.sampleTime` **[number][26]?** The timestamp of the current sample in seconds.
     *   `params.api` &#x20;
+    *   `params.timestamp` &#x20;
 
 <!---->
 
