@@ -299,7 +299,10 @@ export class Gravity {
       gravity: this.accelerometerEstimate,
     });
 
-    return gravity;
+    return Object.assign(gravity, {
+      timestamp: timestamp,
+      frequency: this.frequency,
+    });
   }
 
 }
