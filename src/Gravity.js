@@ -45,13 +45,16 @@ export class Gravity {
   #outputApi;
   #frequency;
   #gyroscopeWeightLinear;
+  #sampleTimeLast
+  #accelerometerEstimate
+  #gyroscopeEstimate
 
   /**
    * Constructs a new instance of the Gravity class, to allow for processing
    * accelerometer and gyroscope data streams, in order to estimate the gravity over time.
    *
    * @param {Object} [options={}] - Configuration options for the Gravity instance.
-   * @param {string} [options.outputApi] - The API version for the input and output data.
+   * @param {string} [options.outputApi='v3'] - The API version for the input and output data.
    * Current version is 'v3'.
    * @param {number} [options.gyroscopeWeightLinear=0.9] - The linear weight for the gyroscope.
    * @param {number} [options.frequency=undefined] - The sample rate for processing. Used
@@ -75,6 +78,11 @@ export class Gravity {
     this.reset();
   }
 
+  /**
+   * The API version for the input and output data. Current version is 'v3'.
+   * @type {String}
+   * @throws {Error} Throws an error if `outputApi` is invalid.
+   */
   get outputApi() {
     return this.#outputApi;
   }
@@ -87,6 +95,11 @@ export class Gravity {
     this.#outputApi = outputApi;
   }
 
+  /**
+   * The sample rate for processing. Used if sampleTime is not provided when processing.
+   * @type {Number|undefined}
+   * @throws {Error} Throws an error if `frequency` is not a positive number.
+   */
   get frequency() {
     return this.#frequency;
   }
@@ -103,6 +116,11 @@ export class Gravity {
     this.#frequency = frequency;
   }
 
+  /**
+   * The linear weight for the gyroscope.
+   * @type {Float}
+   * @throws {Error} Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
+   */
   get gyroscopeWeightLinear() {
     return this.#gyroscopeWeightLinear;
   }
@@ -124,10 +142,10 @@ export class Gravity {
    * accelerometer and gyroscope estimates to null.
    */
   reset() {
-    this.sampleTimeLast = null;
+    this.#sampleTimeLast = null;
 
-    this.accelerometerEstimate = null;
-    this.gyroscopeEstimate = null;
+    this.#accelerometerEstimate = null;
+    this.#gyroscopeEstimate = null;
   }
 
   /**
@@ -214,22 +232,22 @@ export class Gravity {
 
     arrayNormaliseInPlace(accelerometerInput);
 
-    if (!this.accelerometerEstimate) {
-      this.sampleTimeLast = timestamp;
-      this.accelerometerEstimate = accelerometerInput;
-      this.gyroscopeEstimate = gyroscopeInput;
+    if (!this.#accelerometerEstimate) {
+      this.#sampleTimeLast = timestamp;
+      this.#accelerometerEstimate = accelerometerInput;
+      this.#gyroscopeEstimate = gyroscopeInput;
 
       const { gravity } = apiConvert({
         api: 'riot-v1-array',
         outputApi: this.outputApi,
-        gravity: this.accelerometerEstimate,
+        gravity: this.#accelerometerEstimate,
       });
 
       return gravity;
     }
 
     const deltaTime = (timestamp
-      ? timestamp - this.sampleTimeLast
+      ? timestamp - this.#sampleTimeLast
       : 1 / this.frequency
     );
 
@@ -239,22 +257,22 @@ export class Gravity {
 
     // gyroscopeInput in deg/s, delta and angle in rad
     const rollDelta = degreeToRadian(gyroscopeInput[0]) * deltaTime;
-    const rollAngle = atan2(this.accelerometerEstimate[0],
-      this.accelerometerEstimate[2])
+    const rollAngle = atan2(this.#accelerometerEstimate[0],
+      this.#accelerometerEstimate[2])
       + rollDelta;
 
     const pitchDelta = degreeToRadian(gyroscopeInput[1]) * deltaTime;
-    const pitchAngle = atan2(this.accelerometerEstimate[1],
-      this.accelerometerEstimate[2])
+    const pitchAngle = atan2(this.#accelerometerEstimate[1],
+      this.#accelerometerEstimate[2])
       + pitchDelta;
 
     // calculate projection vector from angle estimate
-    this.gyroscopeEstimate[0] = sin(rollAngle);
-    this.gyroscopeEstimate[0] /= sqrt(1 + pow(cos(rollAngle), 2)
+    this.#gyroscopeEstimate[0] = sin(rollAngle);
+    this.#gyroscopeEstimate[0] /= sqrt(1 + pow(cos(rollAngle), 2)
       * pow(tan(pitchAngle), 2));
 
-    this.gyroscopeEstimate[1] = sin(pitchAngle);
-    this.gyroscopeEstimate[1] /= sqrt(1 + pow(cos(pitchAngle), 2)
+    this.#gyroscopeEstimate[1] = sin(pitchAngle);
+    this.#gyroscopeEstimate[1] /= sqrt(1 + pow(cos(pitchAngle), 2)
       * pow(tan(rollAngle), 2));
 
     // estimate sign of RzGyro by looking in what quadrant the angle Axz is,
@@ -262,36 +280,36 @@ export class Gravity {
     const signYaw = cos(rollAngle) >= 0 ? 1 : -1;
 
     // estimate yaw since vector is normalized
-    const gyroEstimateSquared = pow(this.gyroscopeEstimate[0], 2)
-      + pow(this.gyroscopeEstimate[1], 2);
-    this.gyroscopeEstimate[2] = signYaw * sqrt(max(0, 1 - gyroEstimateSquared));
+    const gyroEstimateSquared = pow(this.#gyroscopeEstimate[0], 2)
+      + pow(this.#gyroscopeEstimate[1], 2);
+    this.#gyroscopeEstimate[2] = signYaw * sqrt(max(0, 1 - gyroEstimateSquared));
 
     // interpolate between estimated values and raw values
     for (let i = 0; i < 3; i++) {
-      this.accelerometerEstimate[i] =
-        this.gyroscopeEstimate[i] * this.gyroscopeWeightLinear
+      this.#accelerometerEstimate[i] =
+        this.#gyroscopeEstimate[i] * this.gyroscopeWeightLinear
         + accelerometerInput[i] * (1 - this.gyroscopeWeightLinear);
     }
 
-    arrayNormaliseInPlace(this.accelerometerEstimate);
+    arrayNormaliseInPlace(this.#accelerometerEstimate);
 
     // Rz is too small and because it is used as reference for computing Axz, Ayz
     // it's error fluctuations will amplify leading to bad results. In this case
     // skip the gyro data and just use previous estimate
-    if (abs(this.accelerometerEstimate[2]) < 0.1) {
+    if (abs(this.#accelerometerEstimate[2]) < 0.1) {
       // use input instead of estimation
       // accelerometerInput is already normalized
       for (let i = 0; i < 3; i++) {
-        this.accelerometerEstimate[i] = accelerometerInput[i];
+        this.#accelerometerEstimate[i] = accelerometerInput[i];
       }
     }
 
-    this.sampleTimeLast = timestamp;
+    this.#sampleTimeLast = timestamp;
 
     const { gravity } = apiConvert({
       api: 'riot-v1-array',
       outputApi: this.outputApi,
-      gravity: this.accelerometerEstimate,
+      gravity: this.#accelerometerEstimate,
     });
 
     return Object.assign(gravity, {

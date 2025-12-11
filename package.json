@@ -23,18 +23,28 @@
   ],
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./gravity.js": "./src/Gravity.js",
-    "./*.js": "./src/*.js"
+    ".": {
+      "default": "./src/index.js",
+      "types": "./types/index.d.ts"
+    },
+    "./gravity.js": {
+      "default": "./src/Gravity.js",
+      "types": "./types/Gravity.d.ts"
+    },
+    "./*.js": {
+      "default": "./src/*.js",
+      "types": "./src/*.d.ts"
+    }
   },
   "imports": {
     "#data/*.json": "./test/data/*.json"
   },
   "scripts": {
-    "api": "jsdoc-to-readme --src src/*.js --heading-depth 3",
-    "preversion": "npm run test && npm run api && git commit -am 'chore: doc: rebuild'  --allow-empty",
+    "api": "npm run types && jsdoc-to-readme --src src/*.js --heading-depth 3",
+    "preversion": "npm run test && npm run types && npm run api && git commit -am 'chore: doc: rebuild'  --allow-empty",
     "test": "node --test --experimental-test-coverage 'test/**/*.test.js'",
-    "test:watch": "node --watch --test 'test/**/*.test.js'"
+    "test:watch": "node --watch --test 'test/**/*.test.js'",
+    "types": "rm -rf types && tsc"
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
@@ -43,5 +53,8 @@
     "eslint": "^9.21.0",
     "fast-check": "^4.0.0",
     "jsdoc-to-readme": "^2.0.2"
+  },
+  "dependencies": {
+    "typescript": "^5.9.3"
   }
 }

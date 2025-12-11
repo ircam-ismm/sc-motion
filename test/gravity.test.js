@@ -10,8 +10,6 @@ import { almostEqualArray } from '@ircam/sc-utils';
 
 import { Gravity } from '@ircam/sc-motion/gravity.js';
 import {
-  apiConvert,
-  gToNewton,
   arrayNormaliseInPlace,
   apiValid,
 } from '../src/format.js';
@@ -19,7 +17,6 @@ import {
 const localFileName = fileURLToPath(import.meta.url);
 const localPath = path.dirname(localFileName);
 const dataPath = path.resolve(localPath, 'data');
-
 const tracks = {};
 
 const data = {
