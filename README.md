@@ -286,6 +286,13 @@ Copy and converts sensor data between different API formats.
     *   `options.gyroscope` **dataMotion?** The gyroscope data to convert.
     *   `options.gravity` **dataMotion?** The gravity data to convert.
     *   `options.outputApi` **[string][28]?** The output API format.
+    *   `options.magnetometer` &#x20;
+    *   `options.thermometer` &#x20;
+    *   `options.absoluteorientation` &#x20;
+    *   `options.heading` &#x20;
+    *   `options.battery` &#x20;
+    *   `options.control` &#x20;
+    *   `options.extra` **...any**&#x20;
 
 <!---->
 
