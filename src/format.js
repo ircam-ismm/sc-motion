@@ -258,8 +258,7 @@ export function devicemotionToAccelerometerGyroscope({
   rotationRate,
   ...extra
 }) {
-
-  const sensors = { ...extra};
+  const sensors = { ...extra };
 
   if (accelerationIncludingGravity) {
     // copy

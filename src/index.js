@@ -1,4 +1,6 @@
-export { Gravity } from './gravity.js';
-export * as gravity from './gravity.js';
-
+export { Gravity } from './Gravity.js';
 export * as format from './format.js';
+
+// @note - required for reason by react native
+// @deprecated
+export * as gravity from './Gravity.js';

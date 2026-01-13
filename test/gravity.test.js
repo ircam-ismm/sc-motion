@@ -10,8 +10,6 @@ import { almostEqualArray } from '@ircam/sc-utils';
 
 import { Gravity } from '@ircam/sc-motion/gravity.js';
 import {
-  apiConvert,
-  gToNewton,
   arrayNormaliseInPlace,
   apiValid,
 } from '../src/format.js';
@@ -19,7 +17,6 @@ import {
 const localFileName = fileURLToPath(import.meta.url);
 const localPath = path.dirname(localFileName);
 const dataPath = path.resolve(localPath, 'data');
-
 const tracks = {};
 
 const data = {
@@ -157,7 +154,7 @@ suite('gravity', () => {
   test('constructor with default parameters', () => {
 
     // outputApi is mandatory
-    assert.throws(() => new Gravity() );
+    assert.doesNotThrow(() => new Gravity() );
 
     const gravity = new Gravity({outputApi: 'v3'});
     assert.ok(gravity);
@@ -170,8 +167,8 @@ suite('gravity', () => {
       fc.constantFrom(...apiValid),
       fc.float({ min: 0, max: 1., noNaN: true }),
       fc.float({ min: 0, minExcluded: true, noNaN: true }),
-      (outputApi, gyroscopeWeightLinear, sampleRate) => {
-        const gravity = new Gravity({ outputApi, gyroscopeWeightLinear, sampleRate });
+      (outputApi, gyroscopeWeightLinear, frequency) => {
+        const gravity = new Gravity({ outputApi, gyroscopeWeightLinear, frequency });
         assert.ok(gravity);
       }),
     );
@@ -182,7 +179,7 @@ suite('gravity', () => {
 
     const apiGood = fc.constantFrom(...apiValid);
     const gyroscopeWeightLinearGood = fc.float({ min: 0, max: 1. });
-    const sampleRateGood = fc.float({ min: 0, minExcluded: true });
+    const frequencyGood = fc.float({ min: 0, minExcluded: true });
 
     const debugOptions = {};
 
@@ -190,10 +187,10 @@ suite('gravity', () => {
       fc.assert(fc.property(
         fc.string().filter(s => !apiValid.includes(s)),
         gyroscopeWeightLinearGood,
-        sampleRateGood,
-        (outputApi, gyroscopeWeightLinear, sampleRate) => {
+        frequencyGood,
+        (outputApi, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ outputApi, gyroscopeWeightLinear, sampleRate })
+            new Gravity({ outputApi, gyroscopeWeightLinear, frequency })
           });
         }), {
           ...debugOptions,
@@ -206,24 +203,24 @@ suite('gravity', () => {
       fc.assert(fc.property(
         apiGood,
         fc.float().filter(f => f < 0 || f > 1),
-        sampleRateGood,
-        (api, gyroscopeWeightLinear, sampleRate) => {
+        frequencyGood,
+        (api, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ api, gyroscopeWeightLinear, sampleRate })
+            new Gravity({ api, gyroscopeWeightLinear, frequency })
           });
         }),
       );
 
     });
 
-    test('bad sampleRate', () => {
+    test('bad frequency', () => {
       fc.assert(fc.property(
         apiGood,
         gyroscopeWeightLinearGood,
         fc.float({ max: 0 }),
-        (api, gyroscopeWeightLinear, sampleRate) => {
+        (api, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ api, gyroscopeWeightLinear, sampleRate })
+            new Gravity({ api, gyroscopeWeightLinear, frequency })
           });
         }),
       );
@@ -239,8 +236,8 @@ suite('gravity', () => {
       fc.oneof(fc.constant(undefined), fc.constantFrom(...apiValid)),
       fc.oneof(fc.constant(undefined), fc.float({ min: 0, max: 1., noNaN: true })),
       fc.oneof(fc.constant(undefined), fc.float({ min: 0, minExcluded: true, noNaN: true, noDefaultInfinity:true })),
-      (outputApi, gyroscopeWeightLinear, sampleRate) => {
-        const options = { outputApi, gyroscopeWeightLinear, sampleRate };
+      (outputApi, gyroscopeWeightLinear, frequency) => {
+        const options = { outputApi, gyroscopeWeightLinear, frequency };
         // remove undefined options
         Object.keys(options).forEach((key) => {
           if (options[key] === undefined) {
@@ -255,8 +252,8 @@ suite('gravity', () => {
           if(gyroscopeWeightLinear !== undefined) {
             assert.equal(gravityProcessor.gyroscopeWeightLinear, gyroscopeWeightLinear);
           }
-          if(sampleRate !== undefined) {
-            assert.equal(gravityProcessor.sampleRate, sampleRate);
+          if(frequency !== undefined) {
+            assert.equal(gravityProcessor.frequency, frequency);
           }
         });
       }),
@@ -271,8 +268,8 @@ suite('gravity', () => {
       fc.oneof(fc.constant(undefined), fc.string().filter(s => !apiValid.includes(s))),
       fc.oneof(fc.constant(undefined), fc.float().filter(f => Number.isNaN(f) || f < 0 || f > 1)),
       fc.oneof(fc.constant(undefined), fc.float().filter(f => Number.isNaN(f) || f < 0)),
-      (outputApi, gyroscopeWeightLinear, sampleRate) => {
-        const options = { outputApi, gyroscopeWeightLinear, sampleRate };
+      (outputApi, gyroscopeWeightLinear, frequency) => {
+        const options = { outputApi, gyroscopeWeightLinear, frequency };
         // remove undefined options
         Object.keys(options).forEach((key) => {
           if (options[key] === undefined) {
@@ -296,7 +293,7 @@ suite('gravity', () => {
 
       const gravityProcessor = new Gravity({
           outputApi: 'v3',
-          // no sampleRate
+          // no frequency
       });
 
       const goodParameters = {
@@ -316,14 +313,14 @@ suite('gravity', () => {
   });
 
   test('compare with pipo', () => {
-    const { api, gyroscopeWeightLinear, sampleRate } = data.parameters;
+    const { api, gyroscopeWeightLinear, frequency } = data.parameters;
     // pipo uses float32 for processing
     const tolerance = 1e-5;
 
     const gravityProcessor = new Gravity({
       outputApi: api,
       gyroscopeWeightLinear,
-      sampleRate,
+      frequency,
     });
 
     // warning: to not jump to a sample
@@ -336,11 +333,12 @@ suite('gravity', () => {
         const { accelerometer, gyroscope } = data.input[run];
         const { gravity: gravityExpected } = data.output[run];
 
-        const { gravity } = gravityProcessor.process({
+        const gravity = gravityProcessor.process({
           api,
           accelerometer,
           gyroscope,
         });
+
         assert(almostEqualArray(gravity, gravityExpected, tolerance),
           `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
         run++;

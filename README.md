@@ -53,9 +53,12 @@ In particular, we support the [R-IoT](https://github.com/ircam-ismm/riot-v3) har
 *   [Gravity][19]
     *   [Parameters][20]
     *   [Examples][21]
-    *   [reset][22]
-    *   [set][23]
-    *   [process][24]
+    *   [outputApi][22]
+    *   [frequency][23]
+    *   [gyroscopeWeightLinear][24]
+    *   [reset][25]
+    *   [set][26]
+    *   [process][27]
 
 ## format
 
@@ -101,37 +104,37 @@ console.log(sensorDataConverted);
 
 Data object with x, y, and z properties, for API 'v3'.
 
-Type: [Object][25]
+Type: [Object][28]
 
 #### Properties
 
-*   `x` **[number][26]** The x-coordinate value.
-*   `y` **[number][26]** The y-coordinate value.
-*   `z` **[number][26]** The z-coordinate value.
+*   `x` **[number][29]** The x-coordinate value.
+*   `y` **[number][29]** The y-coordinate value.
+*   `z` **[number][29]** The z-coordinate value.
 
 ### dataAlphaBetaGamma
 
 Data object with alpha, beta and gamma properties, for API 'v3'.
 
-Type: [Object][25]
+Type: [Object][28]
 
 #### Properties
 
-*   `alpha` **[number][26]** The x-coordinate value.
-*   `beta` **[number][26]** The y-coordinate value.
-*   `gamma` **[number][26]** The z-coordinate value.
+*   `alpha` **[number][29]** The x-coordinate value.
+*   `beta` **[number][29]** The y-coordinate value.
+*   `gamma` **[number][29]** The z-coordinate value.
 
 ### dataArray
 
 Data array with three numerical values, for API 'v3'.
 
-Type: [Array][27]<[number][26]>
+Type: [Array][30]<[number][29]>
 
 #### Properties
 
-*   `0` **[number][26]** The first coordinate value.
-*   `1` **[number][26]** The second coordinate value.
-*   `2` **[number][26]** The third coordinate value.
+*   `0` **[number][29]** The first coordinate value.
+*   `1` **[number][29]** The second coordinate value.
+*   `2` **[number][29]** The third coordinate value.
 
 ### dataMotion
 
@@ -145,9 +148,9 @@ Converts an angle from degrees to radians.
 
 #### Parameters
 
-*   `angle` **[number][26]** The angle in degrees to be converted.
+*   `angle` **[number][29]** The angle in degrees to be converted.
 
-Returns **[number][26]** The angle in radians.
+Returns **[number][29]** The angle in radians.
 
 ### radianToDegree
 
@@ -155,15 +158,15 @@ Converts an angle from radians to degrees.
 
 #### Parameters
 
-*   `angle` **[number][26]** The angle in radians to be converted.
+*   `angle` **[number][29]** The angle in radians to be converted.
 
-Returns **[number][26]** The angle converted to degrees.
+Returns **[number][29]** The angle converted to degrees.
 
 ### g
 
 The standard acceleration due to gravity (g) in meters per second squared (m/s²).
 
-Type: [number][26]
+Type: [number][29]
 
 ### gToNewton
 
@@ -171,9 +174,9 @@ Converts a value from g-force (g) to Newtons (N).
 
 #### Parameters
 
-*   `force` **[number][26]** The value in g-force to be converted.
+*   `force` **[number][29]** The value in g-force to be converted.
 
-Returns **[number][26]** The equivalent value in Newtons.
+Returns **[number][29]** The equivalent value in Newtons.
 
 ### newtonToG
 
@@ -181,9 +184,9 @@ Converts a value from Newtons to G-force.
 
 #### Parameters
 
-*   `force` **[number][26]** The value in Newtons to be converted.
+*   `force` **[number][29]** The value in Newtons to be converted.
 
-Returns **[number][26]** The equivalent value in G-force.
+Returns **[number][29]** The equivalent value in G-force.
 
 ### arrayNormaliseInPlace
 
@@ -197,7 +200,7 @@ zero, the vector remains unchanged.
 
 *   `array` **dataArray** A 3-element array representing the 3D vector to normalise.
 
-Returns **[number][26]** The original magnitude (Euclidean norm) of the vector.
+Returns **[number][29]** The original magnitude (Euclidean norm) of the vector.
 
 ### xyzToArray
 
@@ -207,11 +210,11 @@ Converts an object with x, y, and z properties into an array.
 
 *   `coordinates` **dataXyz** The object containing x, y, and z properties.
 
-    *   `coordinates.x` **[number][26]** The x-coordinate value.
-    *   `coordinates.y` **[number][26]** The y-coordinate value.
-    *   `coordinates.z` **[number][26]** The z-coordinate value.
+    *   `coordinates.x` **[number][29]** The x-coordinate value.
+    *   `coordinates.y` **[number][29]** The y-coordinate value.
+    *   `coordinates.z` **[number][29]** The z-coordinate value.
 
-Returns **[Array][27]<[number][26]>** An array containing the x, y, and z values in order.
+Returns **[Array][30]<[number][29]>** An array containing the x, y, and z values in order.
 
 ### arrayToXyz
 
@@ -237,9 +240,9 @@ Converts an object containing alpha, beta, and gamma properties into an array.
 
 *   `angle` **dataAlphaBetaGamma** The input object.
 
-    *   `angle.alpha` **[number][26]** The alpha value.
-    *   `angle.beta` **[number][26]** The beta value.
-    *   `angle.gamma` **[number][26]** The gamma value.
+    *   `angle.alpha` **[number][29]** The alpha value.
+    *   `angle.beta` **[number][29]** The beta value.
+    *   `angle.gamma` **[number][29]** The gamma value.
 
 Returns **dataArray** An array containing the alpha, beta, and gamma values in order.
 
@@ -249,15 +252,15 @@ Converts an array of three elements into an object with properties alpha, beta, 
 
 #### Parameters
 
-*   `$0` **[Array][27]**&#x20;
+*   `$0` **[Array][30]**&#x20;
 
     *   `$0.0` &#x20;
     *   `$0.1` &#x20;
     *   `$0.2` &#x20;
 *   `angle` **dataArray** An array containing three numeric elements \[alpha, beta, gamma].
-*   `angle` **[number][26]** \[0] - The alpha value.
-*   `angle` **[number][26]** \[1] - The beta value.
-*   `angle` **[number][26]** \[2] - The gamma value.
+*   `angle` **[number][29]** \[0] - The alpha value.
+*   `angle` **[number][29]** \[1] - The beta value.
+*   `angle` **[number][29]** \[2] - The gamma value.
 
 Returns **dataAlphaBetaGamma** An object with properties alpha, beta, and gamma.
 
@@ -267,9 +270,9 @@ Validates if the provided API is included in the list of valid  APIs.
 
 #### Parameters
 
-*   `api` **[string][28]** The API name to validate.
+*   `api` **[string][31]** The API name to validate.
 
-Returns **[boolean][29]** Returns `true` if the API is valid, otherwise `false`.
+Returns **[boolean][32]** Returns `true` if the API is valid, otherwise `false`.
 
 ### apiConvert
 
@@ -279,9 +282,9 @@ Copy and converts sensor data between different API formats.
 
 #### Parameters
 
-*   `options` **[Object][25]** The format options.
+*   `options` **[Object][28]** The format options.
 
-    *   `options.api` **[string][28]?** The input API format.
+    *   `options.api` **[string][31]?** The input API format.
     *   `options.accelerometer` **dataMotion?** The accelerometer data to convert.
     *   `options.gyroscope` **dataMotion?** The gyroscope data to convert.
     *   `options.gravity` **dataMotion?** The gravity data to convert.
@@ -296,30 +299,30 @@ Copy and converts sensor data between different API formats.
 
 <!---->
 
-*   Throws **[Error][30]** If the format between the specified input and output APIs is unsupported.
+*   Throws **[Error][33]** If the format between the specified input and output APIs is unsupported.
 
-Returns **[Object][25]** The converted data. The output is a deep copy of the input
+Returns **[Object][28]** The converted data. The output is a deep copy of the input
 data, even if the input and output APIs are the same.
 
 ## Gravity
 
-*   **See**: [https://w3c.github.io/accelerometer/#gravitysensor-interface][31]
+*   **See**: [https://w3c.github.io/accelerometer/#gravitysensor-interface][34]
 
 Gravity class for estimating gravity using accelerometer and gyroscope.
 
 ### Parameters
 
-*   `$0` **[Object][25]**  (optional, default `{}`)
+*   `$0` **[Object][28]**  (optional, default `{}`)
 
-    *   `$0.outputApi` &#x20;
+    *   `$0.outputApi`   (optional, default `'v3'`)
     *   `$0.gyroscopeWeightLinear`   (optional, default `0.9`)
-    *   `$0.sampleRate`   (optional, default `undefined`)
-*   `options` **[Object][25]** Configuration options for the Gravity instance. (optional, default `{}`)
+    *   `$0.frequency`   (optional, default `undefined`)
+*   `options` **[Object][28]** Configuration options for the Gravity instance. (optional, default `{}`)
 
 ### Examples
 
 ```javascript
-import { Gravity } from '@ircam/sc-motion/gravity.js';
+import { Gravity } from '@ircam/sc-motion';
 
 const gravityProcessor = new Gravity({ outputApi: 'v3'});
 
@@ -332,12 +335,9 @@ motionSensor = {
   gyroscope: { x: 0, y: 0, z: 0 },
   sampleTime: 0,
 };
-({ gravity } = gravityProcessor.process(motionSensor) );
+gravity = gravityProcessor.process(motionSensor);
 console.log(gravity);
-// {
-//   api: 'v3',
-//   gravity: { x: 9.80665, y: 0, z: 0 },
-// }
+// { x: 9.80665, y: 0, z: 0 }
 
 motionSensor = {
   api: 'v3',
@@ -345,13 +345,34 @@ motionSensor = {
   gyroscope: { x: -0.001, y: -0.001, z: 0 },
   sampleTime: 0.01,
 };
-({ gravity } = gravityProcessor.process(motionSensor) );
+gravity = gravityProcessor.process(motionSensor);
 console.log(gravity);
-// {
-//   api: 'v3',
-//   gravity: { x: 6.934348715723057, y: 6.934348715723057, z: 0 },
-// }
+// { x: 6.934348715723057, y: 6.934348715723057, z: 0 }
 ```
+
+### outputApi
+
+The API version for the input and output data. Current version is 'v3'.
+
+Type: [String][31]
+
+*   Throws **[Error][33]** Throws an error if `outputApi` is invalid.
+
+### frequency
+
+The sample rate for processing. Used if sampleTime is not provided when processing.
+
+Type: ([Number][29] | [undefined][35])
+
+*   Throws **[Error][33]** Throws an error if `frequency` is not a positive number.
+
+### gyroscopeWeightLinear
+
+The linear weight for the gyroscope.
+
+Type: Float
+
+*   Throws **[Error][33]** Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
 
 ### reset
 
@@ -365,11 +386,11 @@ Sets the attributes for the Gravity instance.
 
 #### Parameters
 
-*   `attributes` **[Object][25]** The attributes to set. Same as constructor.
+*   `attributes` **[Object][28]** The attributes to set. Same as constructor.
 
 <!---->
 
-*   Throws **[Error][30]** Same as constructor.
+*   Throws **[Error][33]** Same as constructor.
 
 ### process
 
@@ -379,19 +400,19 @@ accelerometer, gyroscope and gravity conform to the `api` version.
 
 #### Parameters
 
-*   `params` **[Object][25]** The input parameters. (optional, default `{}`)
+*   `params` **[Object][28]** The input parameters. (optional, default `{}`)
 
     *   `params.accelerometer` **dataMotion** The accelerometer data, conforming to the API version.
     *   `params.gyroscope` **dataMotion** The gyroscope data, conforming to the API version.
-    *   `params.sampleTime` **[number][26]?** The timestamp of the current sample in seconds.
+    *   `params.timestamp` **[number][29]?** The timestamp of the current sample in seconds.
     *   `params.api` &#x20;
 
 <!---->
 
-*   Throws **[Error][30]** Throws an error if API version is missing.
-*   Throws **[Error][30]** Throws an error if accelerometer data is missing.
-*   Throws **[Error][30]** Throws an error if gyroscope data is missing.
-*   Throws **[Error][30]** Throws an error if both sample interval and sample rate are missing (sample rate
+*   Throws **[Error][33]** Throws an error if API version is missing.
+*   Throws **[Error][33]** Throws an error if accelerometer data is missing.
+*   Throws **[Error][33]** Throws an error if gyroscope data is missing.
+*   Throws **[Error][33]** Throws an error if both sample interval and sample rate are missing (sample rate
     comes from the constructor or the set method).
 
 Returns **dataMotion** An object containing the estimated gravity vector. The gravity vector
@@ -439,25 +460,33 @@ is normalised and conforms to the output API version specified in the constructo
 
 [21]: #examples-1
 
-[22]: #reset
+[22]: #outputapi
 
-[23]: #set
+[23]: #frequency
 
-[24]: #process
+[24]: #gyroscopeweightlinear
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[25]: #reset
 
-[26]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+[26]: #set
 
-[27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[27]: #process
 
-[28]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[28]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-[30]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error
+[30]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[31]: https://w3c.github.io/accelerometer/#gravitysensor-interface
+[31]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[32]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[33]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error
+
+[34]: https://w3c.github.io/accelerometer/#gravitysensor-interface
+
+[35]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined
 
 <!-- apistop -->
 
