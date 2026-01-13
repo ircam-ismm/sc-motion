@@ -134,7 +134,7 @@ export function apiValidate(api: string): boolean;
  * @memberof format
  *
  */
-export function apiConvert({ api, accelerometer: accelerometerInput, gyroscope: gyroscopeInput, gravity: gravityInput, outputApi, }: {
+export function apiConvert({ api, accelerometer: accelerometerInput, gyroscope: gyroscopeInput, magnetometer: magnetometerInput, thermometer: thermometerInput, absoluteorientation: absoluteorientationInput, heading: headingInput, battery: batteryInput, gravity: gravityInput, control: controlInput, outputApi, ...extra }: {
     api?: string;
     accelerometer?: dataMotion;
     gyroscope?: dataMotion;
