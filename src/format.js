@@ -299,6 +299,8 @@ export function devicemotionToAccelerometerGyroscope({
  */
 export const apiValid = [
   'v3',
+  'riot-v2-bitalino',
+  'riot-v2-ircam',
   'riot-v2-array',
   'riot-v1-array',
 ];
@@ -339,12 +341,19 @@ export function apiConvert({
   api,
   accelerometer: accelerometerInput,
   gyroscope: gyroscopeInput,
+  magnetometer: magnetometerInput,
+  thermometer: thermometerInput,
+  absoluteorientation: absoluteorientationInput,
+  heading: headingInput,
+  battery: batteryInput,
   gravity: gravityInput,
+  control: controlInput,
   outputApi,
+  ...extra
 }) {
 
   if(api === outputApi) {
-    const returnValue = { api: outputApi };
+    const returnValue = { api: outputApi, ...extra };
     if(accelerometerInput) {
       returnValue.accelerometer = structuredClone(accelerometerInput);
     }
@@ -358,7 +367,7 @@ export function apiConvert({
   } // api === outputApi
 
   if(api === 'v3' && outputApi === 'riot-v1-array') {
-    const returnValue = { api: outputApi };
+    const returnValue = { api: outputApi, ...extra };
 
     if (accelerometerInput) {
       returnValue.accelerometer = [
@@ -387,8 +396,163 @@ export function apiConvert({
 
   } // api === 'v3' && outputApi === 'riot-v1-array'
 
+  if(api === 'riot-v2-bitalino' && outputApi === 'v3') {
+    const returnValue = { api: outputApi, ...extra };
+
+    if(accelerometerInput) {
+      // g to m/s
+      returnValue.accelerometer = {
+        x: accelerometerInput.y * g,
+        y: -accelerometerInput.x * g,
+        z: accelerometerInput.z * g,
+        timestamp: accelerometerInput.timestamp,
+        frequency: accelerometerInput.frequency,
+      };
+    }
+
+    if(gyroscopeInput) {
+      // deg/ms to rad/s
+      // {alpha, beta, gamma} to {x, y, z}
+      returnValue.gyroscope = {
+        x: degreeToRadian(gyroscopeInput.beta * 1e3),
+        y: degreeToRadian(-gyroscopeInput.alpha * 1e3),
+        z: degreeToRadian(gyroscopeInput.gamma * 1e3),
+        timestamp: gyroscopeInput.timestamp,
+        frequency: gyroscopeInput.frequency,
+      };
+    }
+
+    if (magnetometerInput) {
+      // Gauss to microTesla
+      returnValue.magnetometer = {
+        x: -magnetometerInput.y * 1e2,
+        y: -magnetometerInput.x * 1e2,
+        z: magnetometerInput.z * 1e2,
+        timestamp: magnetometerInput.timestamp,
+        frequency: magnetometerInput.frequency,
+      };
+    }
+
+    if (thermometerInput) {
+      returnValue.thermometer = {
+        temperature: thermometerInput.temperature,
+        timestamp: thermometerInput.timestamp,
+        frequency: thermometerInput.frequency,
+      };
+    }
+
+    if (absoluteorientationInput) {
+      const [x, y, z, w] = absoluteorientationInput.quaternion;
+
+      returnValue.absoluteorientation = {
+        quaternion: [x, y, z, w],
+        euler: { ...absoluteorientationInput.euler },
+        timestamp: absoluteorientationInput.timestamp,
+        frequency: absoluteorientationInput.frequency,
+      };
+    }
+
+    if (headingInput) {
+      returnValue.heading = {
+        magnetic: headingInput.magnetic,
+        accuracy: -1,
+        timestamp: headingInput.timestamp,
+        frequency: headingInput.frequency,
+      };
+    }
+
+    if (controlInput) {
+      returnValue.control = { ...controlInput };
+    }
+
+    return returnValue;
+  }
+
+  if (api === 'riot-v2-ircam' && outputApi === 'v3') {
+    const returnValue = { api: outputApi, ...extra };
+
+    if(accelerometerInput) {
+      // g to m/s
+      returnValue.accelerometer = {
+        x: -accelerometerInput.y * g,
+        y: accelerometerInput.x * g,
+        z: accelerometerInput.z * g,
+        timestamp: accelerometerInput.timestamp,
+        frequency: accelerometerInput.frequency,
+      };
+    }
+
+    if(gyroscopeInput) {
+      // deg/ms to rad/s
+      // {alpha, beta, gamma} to {x, y, z}
+      returnValue.gyroscope = {
+        x: degreeToRadian(-gyroscopeInput.beta * 1e3),
+        y: degreeToRadian(gyroscopeInput.alpha * 1e3),
+        z: degreeToRadian(gyroscopeInput.gamma * 1e3),
+        timestamp: gyroscopeInput.timestamp,
+        frequency: gyroscopeInput.frequency,
+      };
+    }
+
+    if (magnetometerInput) {
+      // Gauss to microTesla
+      returnValue.magnetometer = {
+        x: magnetometerInput.y * 1e2,
+        y: magnetometerInput.x * 1e2,
+        z: magnetometerInput.z * 1e2,
+        timestamp: magnetometerInput.timestamp,
+        frequency: magnetometerInput.frequency,
+      };
+    }
+
+    if (thermometerInput) {
+      returnValue.thermometer = {
+        temperature: thermometerInput.temperature,
+        timestamp: thermometerInput.timestamp,
+        frequency: thermometerInput.frequency,
+      };
+    }
+
+    if (absoluteorientationInput) {
+      const [x, y, z, w] = absoluteorientationInput.quaternion;
+
+      returnValue.absoluteorientation = {
+        quaternion: [x, y, z, w],
+        euler: { ...absoluteorientationInput.euler },
+        timestamp: absoluteorientationInput.timestamp,
+        frequency: absoluteorientationInput.frequency,
+      };
+    }
+
+    if (headingInput) {
+      returnValue.heading = {
+        magnetic: headingInput.magnetic,
+        accuracy: -1,
+        timestamp: headingInput.timestamp,
+        frequency: headingInput.frequency,
+      };
+    }
+
+    if (controlInput) {
+      returnValue.control = { ...controlInput };
+    }
+
+    if (batteryInput) {
+      returnValue.battery = {
+        level: batteryInput.level,
+        charging: false,
+        chargingTime: 0,
+        dischargingTime: Infinity,
+        timestamp: batteryInput.timestamp,
+        frequency: batteryInput.frequency,
+      };
+    }
+
+    return returnValue;
+  }
+
   if(api === 'riot-v1-array' && outputApi === 'v3') {
-    const returnValue = { api: outputApi };
+    const returnValue = { api: outputApi, ...extra };
 
     if(accelerometerInput) {
       returnValue.accelerometer = {
@@ -416,7 +580,7 @@ export function apiConvert({
 
 
   if(api === 'riot-v2-array' && outputApi === 'riot-v1-array') {
-    const returnValue = { api: outputApi };
+    const returnValue = { api: outputApi, ...extra };
 
     if (accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
@@ -437,7 +601,7 @@ export function apiConvert({
   } // api === 'riot-v2-array' && outputApi === 'riot-v1-array'
 
   if(api === 'riot-v1-array' && outputApi === 'riot-v2-array') {
-    const returnValue = { api: outputApi };
+    const returnValue = { api: outputApi, ...extra };
 
     if(accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
