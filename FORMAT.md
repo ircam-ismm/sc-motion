@@ -79,13 +79,18 @@ e = {
 
     timestamp, // ms
     frequency, // hz
-
   },
 
   // not in W3C specification
   barometer: {
     pressure, // hPa
     relativeAltitude, // m (0 if not available)
+    timestamp, // ms
+    frequency, // hz
+  },
+
+  thermometer: {
+    temperature, // °C
     timestamp, // ms
     frequency, // hz
   },
@@ -118,12 +123,12 @@ e = {
       // value positive Infinity if the battery is charging, the implementation
       // is unable to report the remaining discharging time, there is no 
       // battery attached to the system, or otherwise. 
+    timestamp, // ms
+    frequency, // hz
   },
 
   control: {
     [key]: value, // e.g. `buttonA: 1,`
-      // Any complex value must be serialised to a string, like:
-      // 'kpad/pad': '[{"x":0.5,"y":0.7},{"x":-0.1,"y":0.2}]'
     timestamp, // ms
   }
 }
@@ -153,7 +158,8 @@ Notes:
 /<source>/<api>/<id>/absoluteorientation/quaternion [x, y, z, w, timestamp, frequency]
 /<source>/<api>/<id>/absoluteorientation/euler      [alpha, beta, gamma, timestamp, frequency]
 /<source>/<api>/<id>/barometer      [pressure, relativeAltitude, timestamp, frequency]
+/<source>/<api>/<id>/thermometer    [temperature, timestamp, frequency]
 /<source>/<api>/<id>/heading        [magnetic, geographic, accuracy, timestamp, frequency]
-/<source>/<api>/<id>/battery        [<level> <charging> <chargingTime> <dischargingTime> , timestamp, frequency]
+/<source>/<api>/<id>/battery        [<level>, <charging>, <chargingTime>, <dischargingTime>, timestamp, frequency]
 /<source>/<api>/<id>/control/<key>  [...values, timestamp]
 ```
