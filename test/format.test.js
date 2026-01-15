@@ -12,6 +12,9 @@ import {
   gToNewton,
   newtonToG,
 
+  gaussToMicrotesla,
+  microteslaToGauss,
+
   xyzToArray,
   arrayToXyz,
 
@@ -26,6 +29,7 @@ import {
   apiValidate,
   arrayNormaliseInPlace,
 } from '../src/format.js';
+import { timeStamp } from 'node:console';
 
 suite('conversion', () => {
 
@@ -96,6 +100,39 @@ suite('conversion', () => {
     });
 
   }); // newtonToG
+
+    test('gaussToMicrotesla', () => {
+
+    const examples = [
+      [0, 0],
+      [1, 100],
+      [0.05, 5],
+      [-2, -200],
+    ];
+
+    // replace with replay options, like
+    // { seed: 824551551, path: "0", endOnFailure: true }
+    const debugOptions = {};
+
+    let run = 0;
+    fc.assert(
+      fc.property(
+        fc.float({ noNaN: true }), fc.float({ noNaN: true }),
+        (valueG, valueMT) => {
+          if (!debugOptions.seed
+            && run < examples.length) {
+            assert(almostEqual(gaussToMicrotesla(valueG), valueMT));
+            assert(almostEqual((valueMT), valueMT));
+          }
+          assert(almostEqual(microteslaToGauss(gaussToMicrotesla(valueG)), valueG));
+          ++run;
+        }), {
+      examples,
+      ...debugOptions,
+    });
+
+  }); // gaussToMicrotesla
+
 
   test('arrayNormaliseInPlace', () => {
     const examples = [
@@ -623,6 +660,123 @@ suite('conversion', () => {
 
     }); // from v2-array to v1-array
 
+
+    [
+      'riot-v2-bitalino',
+      'riot-v2-ircam',
+      'riot-v1',
+    ].forEach((api) => {
+      test(`${api} to v3`, () => {
+        const input = {
+          api,
+          accelerometer: { x: 1, y: 2, z: 3 },
+          gyroscope: { alpha: 4, beta: 5, gamma: 6 },
+          magnetometer: { x: 7, y: 8, z: 9 },
+          absoluteorientation: {
+            quaternion: [ 0.1, 0.2, 0.3, 0.4 ],
+            euler: { alpha: 0.5, beta: 0.6, gamma: 0.7 },
+          },
+          control: { button1: 10, button2: 11, analog1: 12, analog2: 13 },
+          battery: { level: 14 },
+          heading : { magnetic: 15 },
+        };
+
+        const expected = {
+          api,
+          accelerometer: {
+            x: gToNewton(input.accelerometer.y),
+            y: -gToNewton(input.accelerometer.x),
+            z: gToNewton(input.accelerometer.z),
+          },
+          gyroscope: {
+            // deg/ms to rad/s
+            // {alpha, beta, gamma} to {x, y, z}
+            x: degreeToRadian(input.gyroscope.beta * 1e3),
+            y: degreeToRadian(-input.gyroscope.alpha * 1e3),
+            z: degreeToRadian(input.gyroscope.gamma * 1e3),
+          },
+          magnetometer: {
+            x: -gaussToMicrotesla(input.magnetometer.y),
+            y: -gaussToMicrotesla(input.magnetometer.x),
+            z: gaussToMicrotesla(input.magnetometer.z),
+          },
+          absoluteorientation: {
+            quaternion: [
+              // [w, x, y, z] to [x, y, z, w]
+              input.absoluteorientation.quaternion[1],
+              input.absoluteorientation.quaternion[2],
+              input.absoluteorientation.quaternion[3],
+              input.absoluteorientation.quaternion[0],
+            ],
+            euler: {
+              alpha: input.absoluteorientation.euler.alpha,
+              beta: input.absoluteorientation.euler.beta,
+              gamma: input.absoluteorientation.euler.gamma,
+            },
+          },
+          control: { ...input.control },
+        };
+
+        const sensorNamesXYZ = ['accelerometer', 'gyroscope', 'magnetometer'];
+
+        if (api === 'riot-v2-ircam' || api === 'riot-v1') {
+          // reverse x and y axis
+
+          for (let sensorName of sensorNamesXYZ) {
+            const sensor = expected[sensorName];
+            sensor.x *= -1;
+            sensor.y *= -1;
+          }
+        }
+
+        const sensorNames = Object.keys(expected).filter((name) => {
+          return name !== 'api'
+            && name !== 'timestamp'
+            && name !== 'frequency'
+            ;
+        });
+
+        const output = apiConvert({
+          ...input,
+          outputApi: 'v3',
+        });
+
+        sensorNames.forEach(sensorName => {
+          if (sensorNamesXYZ.includes(sensorName)) {
+            assert(almostEqualArray(
+              xyzToArray(output[sensorName]),
+              xyzToArray(expected[sensorName]),
+            ), `${api}:${sensorName}:example: ${JSON.stringify({ input, output, expected })}`);
+            return;
+          }
+
+          if (sensorName === 'absoluteorientation') {
+            assert(almostEqualArray(
+              output[sensorName].quaternion,
+              expected[sensorName].quaternion,
+            ), `${api}:${sensorName}:example: ${JSON.stringify({ input, output, expected })}`);
+
+            for (let angleName in expected[sensorName].euler) {
+              assert(almostEqual(
+                output[sensorName].euler[angleName],
+                expected[sensorName].euler[angleName],
+              ), `${api}:${sensorName}:example: ${JSON.stringify({ input, output, expected })}`);
+            }
+
+            return;
+          }
+
+          assert.deepStrictEqual(
+            output[sensorName],
+            expected[sensorName],
+            `${api}:${sensorName}:example: ${JSON.stringify({ input, output, expected })}`,
+          );
+
+        });
+
+      });
+
+    }); // riot v2 and v1
 
   }); // apiConvert
 

@@ -140,6 +140,14 @@ export function newtonToG(force) {
   return force * gInverse;
 }
 
+export function gaussToMicrotesla(induction) {
+  return induction * 1e2;
+}
+
+export function microteslaToGauss(induction) {
+  return induction * 1e-2;
+}
+
 /**
  * Normalises a 3D vector in place and returns its original magnitude.
  *
@@ -300,6 +308,7 @@ export const apiValid = [
   'v3',
   'riot-v2-bitalino',
   'riot-v2-ircam',
+  'riot-v1',
   'riot-v2-array',
   'riot-v1-array',
 ];
@@ -370,9 +379,9 @@ export function apiConvert({
 
     if (accelerometerInput) {
       returnValue.accelerometer = [
-        -accelerometerInput.y * gInverse,
-        accelerometerInput.x * gInverse,
-        accelerometerInput.z * gInverse,
+        -newtonToG(accelerometerInput.y),
+        newtonToG(accelerometerInput.x),
+        newtonToG(accelerometerInput.z),
       ];
     }
     if (gyroscopeInput) {
@@ -385,9 +394,9 @@ export function apiConvert({
 
     if (gravityInput) {
       returnValue.gravity = [
-        -gravityInput.y * gInverse,
-        gravityInput.x * gInverse,
-        gravityInput.z * gInverse,
+        -newtonToG(gravityInput.y),
+        newtonToG(gravityInput.x),
+        newtonToG(gravityInput.z),
 
       ];
     }
@@ -401,9 +410,9 @@ export function apiConvert({
     if(accelerometerInput) {
       // g to m/s
       returnValue.accelerometer = {
-        x: accelerometerInput.y * g,
-        y: -accelerometerInput.x * g,
-        z: accelerometerInput.z * g,
+        x: gToNewton(accelerometerInput.y),
+        y: -gToNewton(accelerometerInput.x),
+        z: gToNewton(accelerometerInput.z),
         timestamp: accelerometerInput.timestamp,
         frequency: accelerometerInput.frequency,
       };
@@ -424,9 +433,9 @@ export function apiConvert({
     if (magnetometerInput) {
       // Gauss to microTesla
       returnValue.magnetometer = {
-        x: -magnetometerInput.y * 1e2,
-        y: -magnetometerInput.x * 1e2,
-        z: magnetometerInput.z * 1e2,
+        x: -gaussToMicrotesla(magnetometerInput.y),
+        y: -gaussToMicrotesla(magnetometerInput.x),
+        z: gaussToMicrotesla(magnetometerInput.z),
         timestamp: magnetometerInput.timestamp,
         frequency: magnetometerInput.frequency,
       };
@@ -441,7 +450,7 @@ export function apiConvert({
     }
 
     if (absoluteorientationInput) {
-      const [x, y, z, w] = absoluteorientationInput.quaternion;
+      const [w, x, y, z] = absoluteorientationInput.quaternion;
 
       returnValue.absoluteorientation = {
         quaternion: [x, y, z, w],
@@ -473,9 +482,9 @@ export function apiConvert({
     if(accelerometerInput) {
       // g to m/s
       returnValue.accelerometer = {
-        x: -accelerometerInput.y * g,
-        y: accelerometerInput.x * g,
-        z: accelerometerInput.z * g,
+        x: -gToNewton(accelerometerInput.y),
+        y: gToNewton(accelerometerInput.x),
+        z: gToNewton(accelerometerInput.z),
         timestamp: accelerometerInput.timestamp,
         frequency: accelerometerInput.frequency,
       };
@@ -496,9 +505,9 @@ export function apiConvert({
     if (magnetometerInput) {
       // Gauss to microTesla
       returnValue.magnetometer = {
-        x: magnetometerInput.y * 1e2,
-        y: magnetometerInput.x * 1e2,
-        z: magnetometerInput.z * 1e2,
+        x: gaussToMicrotesla(magnetometerInput.y),
+        y: gaussToMicrotesla(magnetometerInput.x),
+        z: gaussToMicrotesla(magnetometerInput.z),
         timestamp: magnetometerInput.timestamp,
         frequency: magnetometerInput.frequency,
       };
@@ -513,7 +522,81 @@ export function apiConvert({
     }
 
     if (absoluteorientationInput) {
-      const [x, y, z, w] = absoluteorientationInput.quaternion;
+      const [w, x, y, z] = absoluteorientationInput.quaternion;
+
+      returnValue.absoluteorientation = {
+        quaternion: [x, y, z, w],
+        euler: { ...absoluteorientationInput.euler },
+        timestamp: absoluteorientationInput.timestamp,
+        frequency: absoluteorientationInput.frequency,
+      };
+    }
+
+    if (headingInput) {
+      returnValue.heading = {
+        magnetic: headingInput.magnetic,
+        accuracy: -1,
+        timestamp: headingInput.timestamp,
+        frequency: headingInput.frequency,
+      };
+    }
+
+    if (controlInput) {
+      returnValue.control = { ...controlInput };
+    }
+
+    if (batteryInput) {
+      returnValue.battery = {
+        level: batteryInput.level,
+        charging: false,
+        chargingTime: 0,
+        dischargingTime: Infinity,
+        timestamp: batteryInput.timestamp,
+        frequency: batteryInput.frequency,
+      };
+    }
+
+    return returnValue;
+  }
+
+  if (api === 'riot-v1' && outputApi === 'v3') {
+    const returnValue = { api: outputApi, ...extra };
+
+    if(accelerometerInput) {
+      // g to m/s
+      returnValue.accelerometer = {
+        x: -gToNewton(accelerometerInput.y),
+        y: gToNewton(accelerometerInput.x),
+        z: gToNewton(accelerometerInput.z),
+        timestamp: accelerometerInput.timestamp,
+        frequency: accelerometerInput.frequency,
+      };
+    }
+
+    if(gyroscopeInput) {
+      // deg/ms to rad/s
+      // {alpha, beta, gamma} to {x, y, z}
+      returnValue.gyroscope = {
+        x: degreeToRadian(-gyroscopeInput.beta * 1e3),
+        y: degreeToRadian(gyroscopeInput.alpha * 1e3),
+        z: degreeToRadian(gyroscopeInput.gamma * 1e3),
+        timestamp: gyroscopeInput.timestamp,
+        frequency: gyroscopeInput.frequency,
+      };
+    }
+
+    if (magnetometerInput) {
+      returnValue.magnetometer = {
+        x: gaussToMicrotesla(magnetometerInput.y),
+        y: gaussToMicrotesla(magnetometerInput.x),
+        z: gaussToMicrotesla(magnetometerInput.z),
+        timestamp: magnetometerInput.timestamp,
+        frequency: magnetometerInput.frequency,
+      };
+    }
+
+    if (absoluteorientationInput) {
+      const [w, x, y, z] = absoluteorientationInput.quaternion;
 
       returnValue.absoluteorientation = {
         quaternion: [x, y, z, w],
@@ -555,9 +638,9 @@ export function apiConvert({
 
     if(accelerometerInput) {
       returnValue.accelerometer = {
-        x: accelerometerInput[1] * g,
-        y: -accelerometerInput[0] * g,
-        z: accelerometerInput[2] * g,
+        x: gToNewton(accelerometerInput[1]),
+        y: -gToNewton(accelerometerInput[0]),
+        z: gToNewton(accelerometerInput[2]),
       };
     }
     if(gyroscopeInput) {
@@ -569,9 +652,9 @@ export function apiConvert({
     }
     if(gravityInput) {
       returnValue.gravity = {
-        x: gravityInput[1] * g,
-        y: -gravityInput[0] * g,
-        z: gravityInput[2] * g,
+        x: gToNewton(gravityInput[1]),
+        y: -gToNewton(gravityInput[0]),
+        z: gToNewton(gravityInput[2]),
       };
     }
     return returnValue;
