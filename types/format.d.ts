@@ -34,6 +34,8 @@ export function gToNewton(force: number): number;
  * @returns {number} The equivalent value in G-force.
  */
 export function newtonToG(force: number): number;
+export function gaussToMicrotesla(induction: any): number;
+export function microteslaToGauss(induction: any): number;
 /**
  * Normalises a 3D vector in place and returns its original magnitude.
  *
