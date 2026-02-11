@@ -1,3 +1,4 @@
+import { linearScale } from '@ircam/sc-utils';
 /**
  * @module format
  *
@@ -147,6 +148,8 @@ export function gaussToMicrotesla(induction) {
 export function microteslaToGauss(induction) {
   return induction * 1e-2;
 }
+
+const batteryRiotToNormalised = linearScale(3.5, 3.9, 0, 1, true);
 
 /**
  * Normalises a 3D vector in place and returns its original magnitude.
@@ -547,7 +550,7 @@ export function apiConvert({
 
     if (batteryInput) {
       returnValue.battery = {
-        level: batteryInput.level,
+        level: batteryRiotToNormalised(batteryInput.level),
         charging: false,
         chargingTime: 0,
         dischargingTime: Infinity,
@@ -621,7 +624,7 @@ export function apiConvert({
 
     if (batteryInput) {
       returnValue.battery = {
-        level: batteryInput.level,
+        level: batteryRiotToNormalised(batteryInput.level),
         charging: false,
         chargingTime: 0,
         dischargingTime: Infinity,

@@ -8,7 +8,7 @@ import fc  from 'fast-check';
 
 import { almostEqualArray } from '@ircam/sc-utils';
 
-import { Gravity } from '@ircam/sc-motion/gravity.js';
+import { Gravity } from '@ircam/sc-motion/Gravity.js';
 import {
   arrayNormaliseInPlace,
   apiValid,
