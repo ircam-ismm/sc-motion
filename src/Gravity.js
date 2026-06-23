@@ -45,9 +45,9 @@ export class Gravity {
   #outputApi;
   #frequency;
   #gyroscopeWeightLinear;
-  #sampleTimeLast
-  #accelerometerEstimate
-  #gyroscopeEstimate
+  #sampleTimeLast;
+  #accelerometerEstimate;
+  #gyroscopeEstimate;
 
   /**
    * Constructs a new instance of the Gravity class, to allow for processing

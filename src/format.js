@@ -164,7 +164,7 @@ const batteryRiotToNormalised = linearScale(3.5, 3.9, 0, 1, true);
  * @returns {number} The original magnitude (Euclidean norm) of the vector.
  */
 export function arrayNormaliseInPlace(array) {
-  let norm = array.reduce( (norm, value) => norm + value * value, 0);
+  let norm = array.reduce((norm, value) => norm + value * value, 0);
   norm = Math.sqrt(norm);
 
   if (norm > 0) {
@@ -187,7 +187,7 @@ export function arrayNormaliseInPlace(array) {
  * @param {number} coordinates.z - The z-coordinate value.
  * @returns {number[]} An array containing the x, y, and z values in order.
  */
-export function xyzToArray({ x, y, z}) {
+export function xyzToArray({ x, y, z }) {
   return [x, y, z];
 }
 
@@ -251,12 +251,13 @@ export function accelerometerGyroscopeToDevicemotion({ accelerometer, gyroscope 
 
   if (gyroscope) {
     const { x, y, z, ...extra } = gyroscope;
+
     Object.assign(devicemotion, {
       ...extra,
       rotationRate: {
-        alpha: radianToDegree(gyroscope.z),
-        beta: radianToDegree(gyroscope.x),
-        gamma: radianToDegree(gyroscope.y),
+        alpha: radianToDegree(z),
+        beta: radianToDegree(x),
+        gamma: radianToDegree(y),
       },
     });
   }
@@ -363,21 +364,21 @@ export function apiConvert({
   ...extra
 }) {
 
-  if(api === outputApi) {
+  if (api === outputApi) {
     const returnValue = { api: outputApi, ...extra };
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       returnValue.accelerometer = structuredClone(accelerometerInput);
     }
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       returnValue.gyroscope = structuredClone(gyroscopeInput);
     }
-    if(gravityInput) {
+    if (gravityInput) {
       returnValue.gravity = structuredClone(gravityInput);
     }
     return returnValue;
   } // api === outputApi
 
-  if(api === 'v3' && outputApi === 'riot-v1-array') {
+  if (api === 'v3' && outputApi === 'riot-v1-array') {
     const returnValue = { api: outputApi, ...extra };
 
     if (accelerometerInput) {
@@ -407,10 +408,10 @@ export function apiConvert({
 
   } // api === 'v3' && outputApi === 'riot-v1-array'
 
-  if(api === 'riot-v2-bitalino' && outputApi === 'v3') {
+  if (api === 'riot-v2-bitalino' && outputApi === 'v3') {
     const returnValue = { api: outputApi, ...extra };
 
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       // g to m/s
       returnValue.accelerometer = {
         x: gToNewton(accelerometerInput.y),
@@ -421,7 +422,7 @@ export function apiConvert({
       };
     }
 
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       // deg/ms to rad/s
       // {alpha, beta, gamma} to {x, y, z}
       returnValue.gyroscope = {
@@ -482,7 +483,7 @@ export function apiConvert({
   if (api === 'riot-v2-ircam' && outputApi === 'v3') {
     const returnValue = { api: outputApi, ...extra };
 
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       // g to m/s
       returnValue.accelerometer = {
         x: -gToNewton(accelerometerInput.y),
@@ -493,7 +494,7 @@ export function apiConvert({
       };
     }
 
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       // deg/ms to rad/s
       // {alpha, beta, gamma} to {x, y, z}
       returnValue.gyroscope = {
@@ -565,7 +566,7 @@ export function apiConvert({
   if (api === 'riot-v1' && outputApi === 'v3') {
     const returnValue = { api: outputApi, ...extra };
 
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       // g to m/s
       returnValue.accelerometer = {
         x: -gToNewton(accelerometerInput.y),
@@ -576,7 +577,7 @@ export function apiConvert({
       };
     }
 
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       // deg/ms to rad/s
       // {alpha, beta, gamma} to {x, y, z}
       returnValue.gyroscope = {
@@ -636,24 +637,24 @@ export function apiConvert({
     return returnValue;
   }
 
-  if(api === 'riot-v1-array' && outputApi === 'v3') {
+  if (api === 'riot-v1-array' && outputApi === 'v3') {
     const returnValue = { api: outputApi, ...extra };
 
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       returnValue.accelerometer = {
         x: gToNewton(accelerometerInput[1]),
         y: -gToNewton(accelerometerInput[0]),
         z: gToNewton(accelerometerInput[2]),
       };
     }
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       returnValue.gyroscope = {
         x: gyroscopeInput[2],
         y: -gyroscopeInput[0],
         z: -gyroscopeInput[1],
       };
     }
-    if(gravityInput) {
+    if (gravityInput) {
       returnValue.gravity = {
         x: gToNewton(gravityInput[1]),
         y: -gToNewton(gravityInput[0]),
@@ -664,7 +665,7 @@ export function apiConvert({
   } // api === 'riot-v1-array' && outputApi === 'v3'
 
 
-  if(api === 'riot-v2-array' && outputApi === 'riot-v1-array') {
+  if (api === 'riot-v2-array' && outputApi === 'riot-v1-array') {
     const returnValue = { api: outputApi, ...extra };
 
     if (accelerometerInput) {
@@ -685,20 +686,20 @@ export function apiConvert({
 
   } // api === 'riot-v2-array' && outputApi === 'riot-v1-array'
 
-  if(api === 'riot-v1-array' && outputApi === 'riot-v2-array') {
+  if (api === 'riot-v1-array' && outputApi === 'riot-v2-array') {
     const returnValue = { api: outputApi, ...extra };
 
-    if(accelerometerInput) {
+    if (accelerometerInput) {
       returnValue.accelerometer = [...accelerometerInput];
     }
-    if(gyroscopeInput) {
+    if (gyroscopeInput) {
       returnValue.gyroscope = [
         1e-3 * gyroscopeInput[1],
         -1e-3 * gyroscopeInput[0],
         1e-3 * gyroscopeInput[2],
       ];
     }
-    if(gravityInput) {
+    if (gravityInput) {
       returnValue.gravity = [...gravityInput];
     }
     return returnValue;

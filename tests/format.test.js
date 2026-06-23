@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { suite, test, before, } from 'node:test';
+import { suite, test } from 'node:test';
 import fc from 'fast-check';
 
 import { almostEqual, almostEqualArray } from '@ircam/sc-utils';
@@ -26,10 +26,9 @@ import {
 
   apiConvert,
   apiValid,
-  apiValidate,
+  // apiValidate,
   arrayNormaliseInPlace,
 } from '../src/format.js';
-import { timeStamp } from 'node:console';
 
 suite('conversion', () => {
 
@@ -52,8 +51,7 @@ suite('conversion', () => {
     let run = 0;
     fc.assert(
       fc.property(
-        fc.float({ noNaN: true }), fc.float({ noNaN: true }),
-        (degree, radian) => {
+        fc.float({ noNaN: true }), fc.float({ noNaN: true }), (degree, radian) => {
           if (!debugOptions.seed
             && run < examples.length) {
             assert(almostEqual(degreeToRadian(degree), radian));
@@ -61,10 +59,12 @@ suite('conversion', () => {
           }
           assert(almostEqual(radianToDegree(degreeToRadian(degree)), degree));
           ++run;
-        }), {
-      examples,
-      ...debugOptions,
-    });
+        },
+      ), {
+        examples,
+        ...debugOptions,
+      },
+    );
 
   }); // degreeToRadian
 
@@ -85,8 +85,7 @@ suite('conversion', () => {
     let run = 0;
     fc.assert(
       fc.property(
-        fc.float({ noNaN: true }), fc.float({ noNaN: true }),
-        (valueN, valueG) => {
+        fc.float({ noNaN: true }), fc.float({ noNaN: true }), (valueN, valueG) => {
           if (!debugOptions.seed
             && run < examples.length) {
             assert(almostEqual(newtonToG(valueN), valueG));
@@ -94,14 +93,16 @@ suite('conversion', () => {
           }
           assert(almostEqual(gToNewton(newtonToG(valueN)), valueN));
           ++run;
-        }), {
-      examples,
-      ...debugOptions,
-    });
+        },
+      ), {
+        examples,
+        ...debugOptions,
+      },
+    );
 
   }); // newtonToG
 
-    test('gaussToMicrotesla', () => {
+  test('gaussToMicrotesla', () => {
 
     const examples = [
       [0, 0],
@@ -117,8 +118,7 @@ suite('conversion', () => {
     let run = 0;
     fc.assert(
       fc.property(
-        fc.float({ noNaN: true }), fc.float({ noNaN: true }),
-        (valueG, valueMT) => {
+        fc.float({ noNaN: true }), fc.float({ noNaN: true }), (valueG, valueMT) => {
           if (!debugOptions.seed
             && run < examples.length) {
             assert(almostEqual(gaussToMicrotesla(valueG), valueMT));
@@ -126,10 +126,12 @@ suite('conversion', () => {
           }
           assert(almostEqual(microteslaToGauss(gaussToMicrotesla(valueG)), valueG));
           ++run;
-        }), {
-      examples,
-      ...debugOptions,
-    });
+        },
+      ), {
+        examples,
+        ...debugOptions,
+      },
+    );
 
   }); // gaussToMicrotesla
 
@@ -171,10 +173,12 @@ suite('conversion', () => {
           }
 
           ++run;
-        }), {
-      examples,
-      ...debugOptions,
-    });
+        },
+      ), {
+        examples,
+        ...debugOptions,
+      },
+    );
 
 
 
@@ -197,9 +201,11 @@ suite('conversion', () => {
           const array = [x, y, z];
           assert.deepStrictEqual(xyzToArray(xyz), array);
           assert.deepStrictEqual(arrayToXyz(array), xyz);
-        }), {
-      ...debugOptions,
-    });
+        },
+      ), {
+        ...debugOptions,
+      },
+    );
 
   }); // xyzToArray
 
@@ -211,15 +217,16 @@ suite('conversion', () => {
 
     fc.assert(
       fc.property(
-        fc.float(), fc.float(), fc.float(),
-        (alpha, beta, gamma) => {
+        fc.float(), fc.float(), fc.float(), (alpha, beta, gamma) => {
           const alphaBetaGamma = { alpha, beta, gamma };
           const array = [alpha, beta, gamma];
           assert.deepStrictEqual(alphaBetaGammaToArray(alphaBetaGamma), array);
           assert.deepStrictEqual(arrayToAlphaBetaGamma(array), alphaBetaGamma);
-        }), {
-      ...debugOptions,
-    });
+        },
+      ), {
+        ...debugOptions,
+      },
+    );
 
   }); // alphaBetaGammaToArray
 
@@ -388,26 +395,21 @@ suite('conversion', () => {
           }
 
           ++run;
-        }), {
-      examples,
-      ...debugOptions,
-    });
+        },
+      ), {
+        examples,
+        ...debugOptions,
+      },
+    );
 
   }); // devicemotion
 
   suite('apiConvert', () => {
-
     test('bad api pairs', () => {
-      const examples = [
-        ['v0', 'v3'],
-        ['v3', 'v0'],
-        ['riot-v1-array', 'v3'],
-        ['v0', 'v0'],
-      ];
-
       // replace with replay options, like
       // { seed: 824551551, path: "0", endOnFailure: true }
       const debugOptions = {};
+
       fc.assert(
         fc.property(
           fc.string().filter(api => !apiValid.includes(api)),
@@ -422,39 +424,37 @@ suite('conversion', () => {
                 });
               });
             }
-          }), {
-        ...debugOptions,
-      });
+          },
+        ), {
+          ...debugOptions,
+        },
+      );
 
     });
 
     test('no change when api === outputApi', () => {
-
       // replace with replay options, like
       // { seed: 824551551, path: "0", endOnFailure: true }
       const debugOptions = {};
 
       fc.assert(
         fc.property(
-          fc.float(), fc.float(), fc.float(),
-          fc.float(), fc.float(), fc.float(),
-          fc.float(), fc.float(), fc.float(),
-          (accX, accY, accZ, gyrX, gyrY, gyrZ, graX, graY, graZ) => {
+          fc.float(), fc.float(), fc.float(), fc.float(), fc.float(), fc.float(), fc.float(), fc.float(), fc.float(), (accX, accY, accZ, gyrX, gyrY, gyrZ, graX, graY, graZ) => {
             apiValid.forEach(api => {
               const outputApi = api;
               const input = (api === 'v3'
                 ? {
-                  api,
-                  accelerometer: { x: accX, y: accY, z: accZ },
-                  gyroscope: { x: gyrX, y: gyrY, z: gyrZ },
-                  gravity: { x: graX, y: graY, z: graZ },
-                }
+                    api,
+                    accelerometer: { x: accX, y: accY, z: accZ },
+                    gyroscope: { x: gyrX, y: gyrY, z: gyrZ },
+                    gravity: { x: graX, y: graY, z: graZ },
+                  }
                 : {
-                  api,
-                  accelerometer: [accX, accY, accZ],
-                  gyroscope: [gyrX, gyrY, gyrZ],
-                  gravity: [graX, graY, graZ],
-                }
+                    api,
+                    accelerometer: [accX, accY, accZ],
+                    gyroscope: [gyrX, gyrY, gyrZ],
+                    gravity: [graX, graY, graZ],
+                  }
               );
 
               assert.deepStrictEqual(
@@ -466,9 +466,11 @@ suite('conversion', () => {
                 `${JSON.stringify({ ...input, outputApi })}`,
               );
             });
-          }), {
-        ...debugOptions,
-      });
+          },
+        ), {
+          ...debugOptions,
+        },
+      );
 
     }); // api === outputApi
 
@@ -517,7 +519,8 @@ suite('conversion', () => {
               });
               ['accelerometer', 'gyroscope', 'gravity'].forEach(key => {
                 assert(almostEqualArray(
-                  output[key], outputExpected[key]),
+                  output[key], outputExpected[key],
+                ),
                   `example: ${JSON.stringify({
                     input, outputApi,
                     output, outputExpected,
@@ -542,13 +545,16 @@ suite('conversion', () => {
                 ),
                 `reverted: ${JSON.stringify({
                   input, outputApi,
-                })}`);
+                })}`,
+              );
             });
 
-          }), {
-        examples,
-        ...debugOptions,
-      });
+          },
+        ), {
+          examples,
+          ...debugOptions,
+        },
+      );
     }
 
     test('from v3 to v1-array and back', () => {
@@ -590,7 +596,7 @@ suite('conversion', () => {
           },
         ],
 
-      ]
+      ];
 
       // replace with replay options, like
       // { seed: 824551551, path: "0", endOnFailure: true }
@@ -645,7 +651,7 @@ suite('conversion', () => {
           },
         ],
 
-      ]
+      ];
 
       // replace with replay options, like
       // { seed: 824551551, path: "0", endOnFailure: true }
@@ -673,7 +679,7 @@ suite('conversion', () => {
           gyroscope: { alpha: 4, beta: 5, gamma: 6 },
           magnetometer: { x: 7, y: 8, z: 9 },
           absoluteorientation: {
-            quaternion: [ 0.1, 0.2, 0.3, 0.4 ],
+            quaternion: [0.1, 0.2, 0.3, 0.4],
             euler: { alpha: 0.5, beta: 0.6, gamma: 0.7 },
           },
           control: { button1: 10, button2: 11, analog1: 12, analog2: 13 },
@@ -733,7 +739,7 @@ suite('conversion', () => {
           return name !== 'api'
             && name !== 'timestamp'
             && name !== 'frequency'
-            ;
+          ;
         });
 
         const output = apiConvert({

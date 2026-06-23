@@ -137,12 +137,12 @@ export function apiValidate(api: string): boolean;
  *
  */
 export function apiConvert({ api, accelerometer: accelerometerInput, gyroscope: gyroscopeInput, magnetometer: magnetometerInput, thermometer: thermometerInput, absoluteorientation: absoluteorientationInput, heading: headingInput, battery: batteryInput, gravity: gravityInput, control: controlInput, outputApi, ...extra }: {
-    api?: string;
-    accelerometer?: dataMotion;
-    gyroscope?: dataMotion;
-    gravity?: dataMotion;
-    outputApi?: string;
-}): any;
+    api?: string | undefined;
+    accelerometer?: dataMotion | undefined;
+    gyroscope?: dataMotion | undefined;
+    gravity?: dataMotion | undefined;
+    outputApi?: string | undefined;
+}): Object;
 /**
  * The standard acceleration due to gravity (g) in meters per second squared (m/s²).
  *
@@ -168,11 +168,11 @@ export const apiValid: string[];
 /**
  * Data object with x, y, and z properties, for API 'v3'.
  */
-export type dataXyz = any;
+export type dataXyz = Object;
 /**
  * Data object with alpha, beta and gamma properties, for API 'v3'.
  */
-export type dataAlphaBetaGamma = any;
+export type dataAlphaBetaGamma = Object;
 /**
  * Data array with three numerical values, for API 'v3'.
  */

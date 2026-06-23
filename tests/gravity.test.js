@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import assert  from 'node:assert';
-import { suite, test, before,  } from 'node:test';
+import { suite, test, before  } from 'node:test';
 import fc  from 'fast-check';
 
 import { almostEqualArray } from '@ircam/sc-utils';
@@ -25,7 +25,7 @@ const data = {
   output: [],
 };
 
-before( async () => {
+before(async () => {
 
   const parametersFilename = 'gravity-pipo-record-parameters.json';
   const dataFilename = 'gravity-pipo-record.json';
@@ -47,12 +47,11 @@ before( async () => {
     'accelerometer',
     'gyroscope',
     'orientation',
-  ].forEach( (name => {
+  ].forEach((name => {
     tracks[name] = mubu.tracks.find(t => t.name === name);
   }));
 
   // accelerometer is master track
-  const sampleCount = tracks.accelerometer.buffers[0].size;
 
   const {
     size: accelerometerSize,
@@ -62,21 +61,21 @@ before( async () => {
   assert(accelerometerMxCols >= 3);
 
   const {
-    size: gyroscopeSize,
+    // size: gyroscopeSize,
     mxCols: gyroscopeMxCols,
     mxData: gyroscopeMxData,
   } = tracks.gyroscope.buffers[0];
   assert(gyroscopeMxCols >= 3);
 
   const {
-    size: orientationSize,
+    // size: orientationSize,
     mxCols: orientationMxCols,
     mxData: orientationMxData,
   } = tracks.orientation.buffers[0];
   assert(orientationMxCols >= 3); // possibly 3 extra Euler angles
 
   let start;
-  for(let sample = 0; sample < accelerometerSize; ++sample) {
+  for (let sample = 0; sample < accelerometerSize; ++sample) {
     start = accelerometerMxCols * sample;
     const accelerometerVector = accelerometerMxData.slice(start, start + 3);
     start = gyroscopeMxCols * sample;
@@ -91,7 +90,7 @@ before( async () => {
     start = orientationMxCols * (sample - 1);
 
     let gravityVector;
-    if(sample === 0) {
+    if (sample === 0) {
       gravityVector =[...accelerometerVector];
       arrayNormaliseInPlace(gravityVector);
     } else {
@@ -108,11 +107,11 @@ suite('data integrity', () => {
 
   suite('accelerometer', () => {
     test('exists', () => {
-      assert.ok( tracks.accelerometer );
+      assert.ok(tracks.accelerometer);
     });
 
     test('columns', () => {
-      assert.strictEqual( tracks.accelerometer.mxCols, 3);
+      assert.strictEqual(tracks.accelerometer.mxCols, 3);
     });
   });
 
@@ -154,9 +153,9 @@ suite('gravity', () => {
   test('constructor with default parameters', () => {
 
     // outputApi is mandatory
-    assert.doesNotThrow(() => new Gravity() );
+    assert.doesNotThrow(() => new Gravity());
 
-    const gravity = new Gravity({outputApi: 'v3'});
+    const gravity = new Gravity({ outputApi: 'v3' });
     assert.ok(gravity);
 
   });
@@ -170,8 +169,8 @@ suite('gravity', () => {
       (outputApi, gyroscopeWeightLinear, frequency) => {
         const gravity = new Gravity({ outputApi, gyroscopeWeightLinear, frequency });
         assert.ok(gravity);
-      }),
-    );
+      },
+    ));
 
   });
 
@@ -190,12 +189,12 @@ suite('gravity', () => {
         frequencyGood,
         (outputApi, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ outputApi, gyroscopeWeightLinear, frequency })
+            new Gravity({ outputApi, gyroscopeWeightLinear, frequency });
           });
-        }), {
-          ...debugOptions,
-        }
-      );
+        },
+      ), {
+        ...debugOptions,
+      });
 
     });
 
@@ -206,10 +205,10 @@ suite('gravity', () => {
         frequencyGood,
         (api, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ api, gyroscopeWeightLinear, frequency })
+            new Gravity({ api, gyroscopeWeightLinear, frequency });
           });
-        }),
-      );
+        },
+      ));
 
     });
 
@@ -220,10 +219,10 @@ suite('gravity', () => {
         fc.float({ max: 0 }),
         (api, gyroscopeWeightLinear, frequency) => {
           assert.throws(() => {
-            new Gravity({ api, gyroscopeWeightLinear, frequency })
+            new Gravity({ api, gyroscopeWeightLinear, frequency });
           });
-        }),
-      );
+        },
+      ));
 
     });
 
@@ -246,18 +245,18 @@ suite('gravity', () => {
         });
         assert.doesNotThrow(() => {
           gravityProcessor.set(options);
-          if(outputApi !== undefined) {
+          if (outputApi !== undefined) {
             assert.equal(gravityProcessor.outputApi, outputApi);
           }
-          if(gyroscopeWeightLinear !== undefined) {
+          if (gyroscopeWeightLinear !== undefined) {
             assert.equal(gravityProcessor.gyroscopeWeightLinear, gyroscopeWeightLinear);
           }
-          if(frequency !== undefined) {
+          if (frequency !== undefined) {
             assert.equal(gravityProcessor.frequency, frequency);
           }
         });
-      }),
-    );
+      },
+    ));
 
   });
 
@@ -283,33 +282,31 @@ suite('gravity', () => {
         assert.throws(() => {
           gravityProcessor.set(options);
         });
-      }),
-    );
+      },
+    ));
 
   });
 
   test('process with bad parameters', () => {
-    const { accelerometer, gyroscope } = data.input[0];
+    const gravityProcessor = new Gravity({
+      outputApi: 'v3',
+      // no frequency
+    });
 
-      const gravityProcessor = new Gravity({
-          outputApi: 'v3',
-          // no frequency
+    const goodParameters = {
+      api: 'v3',
+      accelerometer: { x: 1, y: 2, z: 3 },
+      gyroscope: { x: 4, y: 5, z: 6 },
+      sampleTime: 7,
+    };
+
+    Object.keys(goodParameters).forEach((p) => {
+      const badParameters = structuredClone(goodParameters);
+      delete badParameters[p];
+      assert.throws(() => {
+        gravityProcessor.process(badParameters);
       });
-
-      const goodParameters = {
-          api: 'v3',
-          accelerometer: { x: 1, y: 2, z: 3 },
-          gyroscope: { x: 4, y: 5, z: 6 },
-          sampleTime: 7,
-      };
-
-      Object.keys(goodParameters).forEach( (p) => {
-          const badParameters = structuredClone(goodParameters);
-          delete badParameters[p];
-          assert.throws(() => {
-              gravityProcessor.process(badParameters);
-          });
-      });
+    });
   });
 
   test('compare with pipo', () => {
@@ -325,11 +322,11 @@ suite('gravity', () => {
 
     // warning: to not jump to a sample
     const debugOptions = {};
-
     let run = 0;
+
     fc.assert(fc.property(
       fc.constant({}),
-      (input) => {
+      (_) => {
         const { accelerometer, gyroscope } = data.input[run];
         const { gravity: gravityExpected } = data.output[run];
 
@@ -342,7 +339,8 @@ suite('gravity', () => {
         assert(almostEqualArray(gravity, gravityExpected, tolerance),
           `run: ${run}, gravity: ${gravity}, expected: ${gravityExpected}`);
         run++;
-      }), {
+      },
+    ), {
       numRuns: data.input.length,
       ...debugOptions,
     });

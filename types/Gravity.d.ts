@@ -48,9 +48,9 @@ export class Gravity {
      * @throws {Error} Throws an error if `gyroscopeWeightLinear` is not between 0 and 1.
      */
     constructor({ outputApi, gyroscopeWeightLinear, frequency, }?: {
-        outputApi?: string;
-        gyroscopeWeightLinear?: number;
-        frequency?: number;
+        outputApi?: string | undefined;
+        gyroscopeWeightLinear?: number | undefined;
+        frequency?: number | undefined;
     });
     set outputApi(outputApi: string);
     /**
@@ -86,7 +86,7 @@ export class Gravity {
      *
     * @throws {Error} Same as constructor.
      */
-    set(attributes: any): void;
+    set(attributes: Object): void;
     /**
      * Processes accelerometer and gyroscope data to estimate gravity.
      *
@@ -109,7 +109,7 @@ export class Gravity {
     process({ api, accelerometer, gyroscope, timestamp, }?: {
         accelerometer: dataMotion;
         gyroscope: dataMotion;
-        timestamp?: number;
+        timestamp?: number | undefined;
     }): dataMotion;
     #private;
 }
