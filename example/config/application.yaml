@@ -1,0 +1,6 @@
+name: example
+author: ""
+clients:
+  plot:
+    runtime: browser
+    default: true
