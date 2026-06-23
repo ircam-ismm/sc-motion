@@ -1,6 +1,7 @@
 {
   "name": "@ircam/sc-motion",
   "version": "2.2.1",
+  "license": "BSD-3-Clause",
   "authors": [
     "Frédéric Bevilacqua",
     "Jean-Philippe Lambert",
@@ -42,19 +43,19 @@
   "scripts": {
     "api": "npm run types && jsdoc-to-readme --src src/*.js --heading-depth 3",
     "preversion": "npm run test && npm run types && npm run api && git commit -am 'chore: doc: rebuild'  --allow-empty",
-    "test": "node --test --experimental-test-coverage 'test/**/*.test.js'",
-    "test:watch": "node --watch --test 'test/**/*.test.js'",
+    "lint": "npx eslint ./src ./tests",
+    "test": "node --test --experimental-test-coverage 'tests/**/*.test.js'",
+    "test:watch": "node --watch --test 'tests/**/*.test.js'",
     "types": "rm -rf types && tsc"
   },
-  "license": "BSD-3-Clause",
+  "dependencies": {
+    "@ircam/sc-utils": "^1.14.2"
+  },
   "devDependencies": {
     "@ircam/eslint-config": "^2.0.1",
-    "@ircam/sc-utils": "^1.13.0",
-    "eslint": "^9.21.0",
+    "eslint": "^10.5.0",
     "fast-check": "^4.0.0",
-    "jsdoc-to-readme": "^2.0.2"
-  },
-  "dependencies": {
-    "typescript": "^5.9.3"
+    "jsdoc-to-readme": "^2.0.2",
+    "typescript": "^6.0.3"
   }
 }
