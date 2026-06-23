@@ -42,7 +42,7 @@
   },
   "scripts": {
     "api": "npm run types && jsdoc-to-readme --src src/*.js --heading-depth 3",
-    "preversion": "npm run lint && npm run test && npm run types && npm run api && git commit -am 'chore: doc: rebuild'  --allow-empty",
+    "preversion": "npm run lint && npm run test && npm run types && npm run api && git add . && git commit -m 'chore: doc: rebuild'  --allow-empty",
     "lint": "npx eslint ./src ./tests",
     "test": "node --test --experimental-test-coverage 'tests/**/*.test.js'",
     "test:watch": "node --watch --test 'tests/**/*.test.js'",

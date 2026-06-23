@@ -5,9 +5,10 @@
 .gitignore
 .npmignore
 .tern-port
+.github
 
 TODO.md
 
 docs
-test
-examples
+tests
+example
