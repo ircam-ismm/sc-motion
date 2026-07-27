@@ -19,10 +19,6 @@
   "bugs": {
     "url": "https://github.com/ircam-ismm/sc-motion/issues"
   },
-  "files": [
-    "./src/**/*.js"
-  ],
-  "main": "./src/index.js",
   "exports": {
     ".": {
       "default": "./src/index.js",
