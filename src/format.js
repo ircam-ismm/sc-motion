@@ -1,4 +1,4 @@
-import { linearScale } from '@ircam/sc-utils';
+import { linearScale } from '@ircam/sc-utils/linear-scale.js';
 /**
  * @module format
  *
