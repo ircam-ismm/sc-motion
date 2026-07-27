@@ -21,16 +21,16 @@
   },
   "exports": {
     ".": {
-      "default": "./src/index.js",
-      "types": "./types/index.d.ts"
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
     },
     "./gravity.js": {
-      "default": "./src/Gravity.js",
-      "types": "./types/Gravity.d.ts"
+      "types": "./types/Gravity.d.ts",
+      "default": "./src/Gravity.js"
     },
     "./*.js": {
-      "default": "./src/*.js",
-      "types": "./src/*.d.ts"
+      "types": "./src/*.d.ts",
+      "default": "./src/*.js"
     }
   },
   "imports": {
@@ -45,7 +45,7 @@
     "types": "rm -rf types && tsc"
   },
   "dependencies": {
-    "@ircam/sc-utils": "^1.14.2"
+    "@ircam/sc-utils": "^1.14.4"
   },
   "devDependencies": {
     "@ircam/eslint-config": "^2.0.1",
